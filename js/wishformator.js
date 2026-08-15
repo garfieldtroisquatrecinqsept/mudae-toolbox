@@ -17,8 +17,20 @@ var WishFormator = (function(){
   var circular = true;
   var dragIndex = null;
   var activeBubble = null;
-  var EMOJI_RE = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F1E6}-\u{1F1FF}\u{2B00}-\u{2BFF}\u{FE0F}]/u;
   var TAG_EMOJI = { "⭐": "star", "✅": "owned", "🔐": "lock" };
+  var store = Utils.createStore("mudae-wish");
+
+  function persist(){
+    var state = { entries: entries, circular: circular };
+    store.save(state);
+    store.checkpoint(state);
+  }
+
+  function restoreState(state){
+    entries = state.entries || [];
+    circular = !!state.circular;
+    $("wishCircular").checked = circular;
+  }
 
   function extractEmojiTag(name){
     var tag = null;
@@ -232,6 +244,16 @@ var WishFormator = (function(){
       container.appendChild(item);
     });
 
+    if(!container.children.length){
+      if(entries.length){
+        Utils.emptyState(container, "heart-list", "Aucun résultat",
+          "Aucun personnage ne correspond à ce filtre.");
+      } else {
+        Utils.emptyState(container, "heart-list", "Wishlist vide",
+          "Colle ta wishlist plus haut pour la réorganiser et générer les commandes.");
+      }
+    }
+
     var active = activeEntries();
     var limit = parseInt($("wishSlotLimit").value, 10) || 0;
     var over = limit > 0 && active.length > limit;
@@ -260,6 +282,8 @@ var WishFormator = (function(){
         best && best.received > 0 ? best.name : "aucun bonus en jeu", "orange") +
       statCard("Adjacence", circular ? "Circulaire" : "Linéaire",
         circular ? "le dernier touche le premier" : "chaîne ouverte", "blue");
+
+    persist();
   }
 
   var BUBBLE_TAGS = ["star", "lock", "remove"];
@@ -368,12 +392,6 @@ var WishFormator = (function(){
     };
   }
 
-  function parseQuickAdd(text){
-    return text.split("$")
-      .map(function(n){ return n.trim(); })
-      .filter(function(n){ return n.length > 0; });
-  }
-
   function withTag(tag){
     return entries.filter(function(e){ return hasTag(e, tag); })
       .map(function(e){ return e.name; });
@@ -463,40 +481,20 @@ var WishFormator = (function(){
     render();
   }
 
-  function addQuickEntries(){
-    var raw = $("wishQuickInput").value;
-    var names = parseQuickAdd(raw);
-
-    var seen = {};
-    entries.forEach(function(e){ seen[e.name.toLowerCase()] = true; });
-
-    var added = 0, rejected = 0;
-    names.forEach(function(n){
-      var tagged = extractEmojiTag(n);
-      if(!tagged.name || EMOJI_RE.test(tagged.name)){ rejected++; return; }
-      var key = tagged.name.toLowerCase();
-      if(seen[key]) return;
-      seen[key] = true;
-      entries.push({ name: tagged.name, tags: [tagged.tag || "wish"], give: 0, received: 0 });
-      added++;
+  function init(){
+    Utils.attachVersions("wishVersionsBtn", store, function(state){
+      restoreState(state);
+      $("wishWorkspace").style.display = "block";
+      render();
+      Utils.setStatus($("wishStatus"), "Version restaurée (" + entries.length + " personnage(s)).", "ok");
     });
 
-    if(added){
-      $("wishQuickInput").value = "";
+    var saved = store.load();
+    if(saved && saved.entries && saved.entries.length){
+      restoreState(saved);
       $("wishWorkspace").style.display = "block";
       render();
     }
-
-    var msg = added + " personnage(s) ajouté(s).";
-    if(rejected) msg += " " + rejected + " ignoré(s) (emoji non reconnu — ⭐ ✅ 🔐 sont convertis en tag, les autres sont refusés).";
-    Utils.setStatus($("wishStatus"), msg, added ? "ok" : "error");
-  }
-
-  function init(){
-    $("wishQuickAddBtn").addEventListener("click", addQuickEntries);
-    $("wishQuickInput").addEventListener("keydown", function(e){
-      if(e.key === "Enter"){ e.preventDefault(); addQuickEntries(); }
-    });
 
     $("wishFilter").addEventListener("input", render);
 

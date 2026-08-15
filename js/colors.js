@@ -3,6 +3,30 @@ var ColorPicker = (function(){
   var $ = Utils.$;
 
   var targets = [];
+  var store = Utils.createStore("mudae-colors");
+
+  function persist(){
+    var state = {
+      targets: targets.map(function(t){
+        return { name: t.name, keys: t.keys, url: t.url, color: t.color };
+      }),
+      command: $("colorCommand").value
+    };
+    store.save(state);
+    store.checkpoint(state);
+  }
+
+  function restoreState(state){
+    targets = (state.targets || []).map(function(t){
+      return { name: t.name, keys: t.keys, url: t.url, color: t.color };
+    });
+    if(state.command){
+      var hasOption = Array.prototype.some.call($("colorCommand").options, function(o){
+        return o.value === state.command;
+      });
+      if(hasOption) $("colorCommand").value = state.command;
+    }
+  }
 
   var PRESETS = [
     "#FF5C72", "#FF9D4D", "#F4D35E", "#4CAF62", "#33D6C0",
@@ -52,6 +76,7 @@ var ColorPicker = (function(){
       });
     $("colorOutput").textContent = lines.join("\n");
     $("colorAssigned").textContent = lines.length + " / " + targets.length + " personnage(s) coloré(s)";
+    persist();
   }
 
   function readableOn(hex){
@@ -117,16 +142,163 @@ var ColorPicker = (function(){
     updateOutput();
   }
 
-  function renderPalette(target, container){
-    container.innerHTML = "";
+  function hexToHsl(hex){
+    var r = parseInt(hex.slice(1, 3), 16);
+    var g = parseInt(hex.slice(3, 5), 16);
+    var b = parseInt(hex.slice(5, 7), 16);
+    return Utils.rgbToHsl(r, g, b);
+  }
+
+  var activeWheel = null;
+
+  function closeColorWheel(){
+    if(!activeWheel) return;
+    activeWheel.cleanup();
+    if(activeWheel.el.parentNode) activeWheel.el.parentNode.removeChild(activeWheel.el);
+    activeWheel = null;
+  }
+
+  function drawWheel(canvas, lightness){
+    var ctx = canvas.getContext("2d");
+    var w = canvas.width, h = canvas.height;
+    var cx = w / 2, cy = h / 2, radius = Math.min(cx, cy) - 1;
+    var img = ctx.createImageData(w, h);
+    for(var y = 0; y < h; y++){
+      for(var x = 0; x < w; x++){
+        var dx = x - cx, dy = y - cy;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        var idx = (y * w + x) * 4;
+        if(dist > radius){ img.data[idx + 3] = 0; continue; }
+        var hue = (Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360;
+        var sat = Math.min(1, dist / radius);
+        var rgb = Utils.hslToRgb(hue, sat, lightness);
+        img.data[idx] = rgb.r;
+        img.data[idx + 1] = rgb.g;
+        img.data[idx + 2] = rgb.b;
+        img.data[idx + 3] = 255;
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+
+  function openColorWheel(target, anchorEl){
+    closeColorWheel();
+
+    var start = target.color ? hexToHsl(target.color) : { h: 265, s: .7, l: .65 };
+    var angle = start.h, sat = start.s, lightness = start.l;
+
+    var popup = document.createElement("div");
+    popup.className = "color-wheel-popup";
+
+    var canvas = document.createElement("canvas");
+    canvas.className = "cw-canvas";
+    canvas.width = 176;
+    canvas.height = 176;
+    popup.appendChild(canvas);
+
+    var lightInput = document.createElement("input");
+    lightInput.type = "range";
+    lightInput.min = 0; lightInput.max = 100;
+    lightInput.value = Math.round(lightness * 100);
+    lightInput.className = "cw-light";
+    popup.appendChild(lightInput);
+
+    var previewRow = document.createElement("div");
+    previewRow.className = "cw-preview-row";
+    var swatch = document.createElement("span");
+    swatch.className = "cw-swatch";
+    var hexLabel = document.createElement("span");
+    hexLabel.className = "cw-hex";
+    previewRow.appendChild(swatch);
+    previewRow.appendChild(hexLabel);
+    popup.appendChild(previewRow);
+
+    var presetsRow = document.createElement("div");
+    presetsRow.className = "preset-row";
     PRESETS.forEach(function(hex){
       var dot = document.createElement("button");
+      dot.type = "button";
       dot.className = "preset-dot";
       dot.style.background = hex;
       dot.title = hex;
-      dot.addEventListener("click", function(){ setColor(target, hex); });
-      container.appendChild(dot);
+      dot.addEventListener("click", function(){ apply(hex); });
+      presetsRow.appendChild(dot);
     });
+    popup.appendChild(presetsRow);
+
+    var closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.className = "small-btn cw-close";
+    closeBtn.textContent = "Fermer";
+    popup.appendChild(closeBtn);
+
+    document.body.appendChild(popup);
+    var rect = anchorEl.getBoundingClientRect();
+    popup.style.top = (rect.bottom + window.scrollY + 8) + "px";
+    popup.style.left = (rect.left + window.scrollX) + "px";
+    var maxLeft = window.scrollX + document.documentElement.clientWidth - popup.offsetWidth - 12;
+    if(rect.left > maxLeft) popup.style.left = Math.max(12, maxLeft) + "px";
+
+    function apply(hex){
+      setColor(target, hex);
+      swatch.style.background = hex;
+      hexLabel.textContent = hex;
+    }
+
+    function pickFromEvent(e){
+      var r = canvas.getBoundingClientRect();
+      var x = (e.clientX - r.left) * (canvas.width / r.width);
+      var y = (e.clientY - r.top) * (canvas.height / r.height);
+      var cx = canvas.width / 2, cy = canvas.height / 2;
+      var radius = Math.min(cx, cy) - 1;
+      var dx = x - cx, dy = y - cy;
+      var dist = Math.min(radius, Math.sqrt(dx * dx + dy * dy));
+      angle = (Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360;
+      sat = dist / radius;
+      var rgb = Utils.hslToRgb(angle, sat, lightness);
+      apply(Utils.rgbToHex(rgb.r, rgb.g, rgb.b));
+    }
+
+    var dragging = false;
+    canvas.addEventListener("pointerdown", function(e){
+      dragging = true;
+      canvas.setPointerCapture(e.pointerId);
+      pickFromEvent(e);
+    });
+    canvas.addEventListener("pointermove", function(e){ if(dragging) pickFromEvent(e); });
+    canvas.addEventListener("pointerup", function(){ dragging = false; });
+
+    lightInput.addEventListener("input", function(){
+      lightness = this.value / 100;
+      drawWheel(canvas, lightness);
+      var rgb = Utils.hslToRgb(angle, sat, lightness);
+      apply(Utils.rgbToHex(rgb.r, rgb.g, rgb.b));
+    });
+
+    drawWheel(canvas, lightness);
+    swatch.style.background = target.color || "#B26BFF";
+    hexLabel.textContent = target.color || "—";
+
+    closeBtn.addEventListener("click", closeColorWheel);
+
+    function onOutside(e){
+      if(popup.contains(e.target) || e.target === anchorEl || anchorEl.contains(e.target)) return;
+      closeColorWheel();
+    }
+    function onKey(e){ if(e.key === "Escape") closeColorWheel(); }
+
+    setTimeout(function(){
+      document.addEventListener("click", onOutside);
+      document.addEventListener("keydown", onKey);
+    }, 0);
+
+    activeWheel = {
+      el: popup,
+      cleanup: function(){
+        document.removeEventListener("click", onOutside);
+        document.removeEventListener("keydown", onKey);
+      }
+    };
   }
 
   function extractFor(target){
@@ -208,8 +380,11 @@ var ColorPicker = (function(){
       input.value = target.color || "#B26BFF";
       input.addEventListener("input", function(){ setColor(target, this.value); });
 
-      var palette = document.createElement("div");
-      palette.className = "preset-row";
+      var wheelBtn = document.createElement("button");
+      wheelBtn.type = "button";
+      wheelBtn.className = "small-btn";
+      wheelBtn.textContent = "Roue";
+      wheelBtn.addEventListener("click", function(){ openColorWheel(target, wheelBtn); });
 
       var extracted = document.createElement("div");
       extracted.className = "preset-row";
@@ -225,12 +400,10 @@ var ColorPicker = (function(){
       target.input = input;
       target.extractedBox = extracted;
 
-      renderPalette(target, palette);
-
       var controls = document.createElement("div");
       controls.className = "hcolors";
       controls.appendChild(input);
-      controls.appendChild(palette);
+      controls.appendChild(wheelBtn);
       controls.appendChild(extractBtn);
       controls.appendChild(extracted);
 
@@ -242,10 +415,29 @@ var ColorPicker = (function(){
       applyRowColor(target);
     });
 
+    if(!targets.length){
+      Utils.emptyState(list, "palette", "Aucun personnage",
+        "Colle la sortie de $mmysi-c- plus haut pour attribuer des couleurs.");
+    }
+
     updateOutput();
   }
 
   function init(){
+    Utils.attachVersions("colorVersionsBtn", store, function(state){
+      restoreState(state);
+      $("colorWorkspace").style.display = "block";
+      render();
+      Utils.setStatus($("colorStatus"), "Version restaurée (" + targets.length + " personnage(s)).", "ok");
+    });
+
+    var saved = store.load();
+    if(saved && saved.targets && saved.targets.length){
+      restoreState(saved);
+      $("colorWorkspace").style.display = "block";
+      render();
+    }
+
     $("colorParseBtn").addEventListener("click", function(){
       targets = parseTargets($("colorInput").value);
       if(!targets.length){

@@ -23,6 +23,32 @@
 <link rel="stylesheet" href="css/carousel.css">
 </head>
 <body>
+<!-- Jeu d'icônes maison, dans l'esprit Mudae mais redessinées : aucune
+     ressource du bot n'est copiée, tout suit la couleur du thème et
+     reste net à n'importe quelle taille. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="ico-kakera" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="1.3" stroke-linejoin="round">
+    <path d="M12 2.4 21 9l-9 12.6L3 9l9-6.6z"/>
+    <path d="M3 9h18M12 2.4 8 9l4 12.6M12 2.4 16 9l-4 12.6"/>
+  </symbol>
+  <symbol id="ico-heart-list" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 20.5s-7.2-4.6-7.2-9.7A4 4 0 0 1 12 8.4a4 4 0 0 1 7.2 2.4c0 5.1-7.2 9.7-7.2 9.7z"/>
+    <path d="M3 4.2h7M3 7.2h4"/>
+  </symbol>
+  <symbol id="ico-sort" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="1.3" stroke-linecap="round">
+    <path d="M4 6.5h11M4 12h7M4 17.5h4"/>
+    <path d="M17.5 8.5v10M14.5 15.5l3 3 3-3"/>
+  </symbol>
+  <symbol id="ico-palette" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3a9 9 0 1 0 0 18c1 0 1.7-.8 1.7-1.7 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-1 .8-1.7 1.7-1.7H16a5 5 0 0 0 5-5c0-4-4-7.2-9-7.2z"/>
+    <circle cx="7.5" cy="11" r="1.1"/><circle cx="11" cy="7.5" r="1.1"/><circle cx="15.5" cy="9" r="1.1"/>
+  </symbol>
+</svg>
+
 <div class="loader" id="loader" aria-hidden="true">
   <div class="loader-mark"><span></span><span></span><span></span></div>
 </div>
@@ -37,6 +63,10 @@
 <header class="hero" id="hero">
   <div class="hero-strips" id="heroStrips" aria-hidden="true"></div>
   <div class="hero-spotlight" id="heroSpotlight" aria-hidden="true"></div>
+  <button class="hero-stats-btn" id="statsHeroBtn" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="20" x2="5" y2="12"/><line x1="12" y1="20" x2="12" y2="6"/><line x1="19" y1="20" x2="19" y2="15"/></svg>
+    Mes stats
+  </button>
   <div class="hero-inner">
     <span class="hero-badge"><span class="dot"></span>Assistant Mudae non-officiel</span>
     <h1 class="hero-title">
@@ -53,7 +83,7 @@
 <div class="app">
   <div class="topbar">
     <div class="topbar-row">
-      <div class="brand"><span class="brand-mark"></span>Mudae Toolbox</div>
+      <div class="brand"><svg class="brand-kakera" aria-hidden="true"><use href="#ico-kakera"></use></svg>Mudae Toolbox</div>
       <button class="theme-toggle" id="themeToggle" type="button" aria-label="Basculer en mode jour">
         <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
         <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12H5M19 12h2.5M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"/></svg>
@@ -91,10 +121,6 @@
             <button class="tab-btn carousel-card" data-tab="colors">
               <svg class="carousel-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="9" cy="9" r="6"/><circle cx="15" cy="9" r="6"/><circle cx="12" cy="15" r="6"/></svg>
               <span class="carousel-card-label">Couleurs</span>
-            </button>
-            <button class="tab-btn carousel-card" data-tab="stats">
-              <svg class="carousel-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="20" x2="5" y2="12"/><line x1="12" y1="20" x2="12" y2="6"/><line x1="19" y1="20" x2="19" y2="15"/></svg>
-              <span class="carousel-card-label">Mes stats</span>
             </button>
           </div>
         </div>
@@ -299,6 +325,7 @@
       </div>
 
       <div id="solver-oq" class="solver-panel">
+       <div class="grid-2 grid-start">
         <div class="card">
           <h2>Règles de $ouroquest</h2>
           <p>Grille 5×5, 4 sphères violettes cachées. La couleur d'une case revèle le nombre de violettes parmi ses 8 voisines :</p>
@@ -319,9 +346,11 @@
           <div class="btn-row"><button class="small-btn" id="oqResetBtn">Réinitialiser</button></div>
           <div class="solver-result" id="oqResult"></div>
         </div>
+       </div>
       </div>
 
       <div id="solver-oc" class="solver-panel" style="display:none;">
+       <div class="grid-2 grid-start">
         <div class="card">
           <h2>Règles de $ourochest</h2>
           <p>Une seule sphère rouge cachée, 5 clics. La couleur d'une case indique sa position relative à la rouge :</p>
@@ -348,9 +377,11 @@
           <div class="btn-row"><button class="small-btn" id="ocResetBtn">Réinitialiser</button></div>
           <div class="solver-result" id="ocResult"></div>
         </div>
+       </div>
       </div>
 
       <div id="solver-ot" class="solver-panel" style="display:none;">
+       <div class="grid-2 grid-start">
         <div class="card">
           <h2>Règles de $ourotrace</h2>
           <p>Retrouve toutes les cases colorées, regroupées en séries contiguës. La couleur indique la longueur de la série :</p>
@@ -374,6 +405,7 @@
           <div class="btn-row"><button class="small-btn" id="otResetBtn">Réinitialiser</button></div>
           <div class="solver-result" id="otResult"></div>
         </div>
+       </div>
       </div>
     </section>
 
@@ -393,22 +425,10 @@
           <button class="btn-primary" id="wishBuildBtn">Importer et déduire les perks</button>
         </div>
         <div class="status" id="wishStatus"></div>
-        <div class="info-box">
-          <b>Reçu → donné.</b> Le % affiché est ce que chaque personnage reçoit de ses voisins ; l'appli en déduit son niveau de perk et le garde attaché quand tu réorganises.<br><br>
-          <b>Un nom par ligne.</b> Sur une seule ligne, impossible de savoir où un nom s'arrête (ex. « Zero Two Lab Member No. 004 »). Le parseur se rabat sur les doubles espaces et t'avertit si besoin.
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Ajout rapide</h2>
-        <div class="quick-add-row">
-          <input type="text" id="wishQuickInput" placeholder="Reze$Asa Mitaka$Lelouch" aria-label="Noms séparés par $">
-          <button class="small-btn" id="wishQuickAddBtn" type="button">Ajouter</button>
-        </div>
-        <p class="hint">Tag auto si présent dans le nom : ⭐ star · ✅ acquis · 🔐 lock.</p>
       </div>
 
       <div id="wishWorkspace" style="display:none;">
+        <div class="grid-2 grid-start">
         <div class="card">
           <h2><span class="num">2</span>Organiser et taguer</h2>
           <p class="hint">Glisse pour réordonner (recalcul en direct). Clique une carte pour son statut et son niveau de perk.</p>
@@ -418,6 +438,7 @@
             <button class="small-btn" id="wishAllStar">Tout en star</button>
             <button class="small-btn" id="wishReverse">Inverser</button>
             <button class="small-btn" id="wishGroupCarriers">Répartir les porteurs</button>
+            <button class="small-btn" id="wishVersionsBtn" type="button">Versions</button>
           </div>
           <label>Limite de slots de wishlist (0 = pas de limite)</label>
           <input type="number" id="wishSlotLimit" min="0" value="0" style="max-width:160px;">
@@ -431,6 +452,7 @@
           <div class="wish-list" id="wishList" aria-live="polite"></div>
         </div>
 
+        <div>
         <div class="card">
           <h2><span class="num">3</span>Bilan des bonus d'adjacence</h2>
           <div class="stat-grid" id="wishAdjSummary"></div>
@@ -453,6 +475,8 @@
             <button class="btn-primary" id="wishGenerateBtn">Générer les commandes</button>
           </div>
         </div>
+        </div>
+        </div>
       </div>
 
       <div class="card" id="wishScriptCard" style="display:none;">
@@ -470,91 +494,14 @@
 
     <section id="panel-boost" class="panel">
       <h1>Boostwish Calculator</h1>
-      <p class="subtitle">Taux d'apparition réel puis investissement $bw optimal.</p>
+      <p class="subtitle">Combien de rolls investir dans $bw pour maximiser tes chances.</p>
 
       <div class="card">
-        <h2>Comment fonctionne $boostwish</h2>
-        <p>$boostwish ($bw) échange des rolls bonus permanents contre un multiplicateur de spawn sur ta wishlist. Rendement dégressif par roll investi :</p>
-        <ul class="tips">
-          <li><b>+20%</b> — les 5 premiers rolls</li>
-          <li><b>+15%</b> — jusqu'à 15</li>
-          <li><b>+10%</b> — jusqu'à 100</li>
-          <li><b>+5%</b> — jusqu'à 200</li>
-          <li><b>+1%</b> — au-delà</li>
-        </ul>
-        <p class="hint">Bonus $starwish inclus : +10% par roll (+5% après 100, +1% après 200).</p>
-        <p>Compromis : les rolls investis ne sont plus lancés. L'optimum = <b>rolls restants × multiplicateur</b>, maximisé.</p>
-        <div class="warn-box">Les rolls empilés ($us) ne sont pas boostés, et seuls les rolls bonus issus des upgrades sont investissables. Le cooldown pour redescendre est de 12 heures.</div>
-      </div>
-
-      <div class="card">
-        <h2><span class="num">1</span>Taux d'apparition d'un wish</h2>
-        <p class="hint">Valeurs à récupérer avec $wltu, $bonus, $dld et $persr.</p>
+        <p class="hint">Les valeurs de ton compte viennent de <b>Mes stats</b> (bouton en haut de page). Le calcul cherche le $bw qui te donne le <b>plus de wishes possible</b>.</p>
         <div class="grid-2">
-          <div>
-            <label>Wishes dans ton type de roll ($wltu)</label>
-            <input type="number" id="srWishes" min="0" value="100">
-          </div>
-          <div>
-            <label>Boost wishlist badges en % ($bonus)</label>
-            <input type="number" id="srBadgeBoost" min="0" value="150">
-          </div>
-        </div>
-        <div class="grid-2">
-          <div>
-            <label>Boost première wish en % ($fw)</label>
-            <input type="number" id="srFirstBoost" min="0" value="0">
-          </div>
-          <div>
-            <label>Personnages désactivés ($dld)</label>
-            <input type="number" id="srDisabled" min="0" value="0">
-          </div>
-        </div>
-        <div class="grid-2">
-          <div>
-            <label>Personnages non claim du pool</label>
-            <input type="number" id="srUnclaimed" min="0" value="1000">
-          </div>
-          <div>
-            <label>Taille totale du pool</label>
-            <input type="number" id="srTotal" min="1" value="2000">
-          </div>
-        </div>
-        <div class="grid-2">
-          <div>
-            <label>Personal rare ($persr)</label>
-            <input type="number" id="srPersonalRare" min="0" step="0.1" value="1">
-          </div>
-          <div>
-            <label>Rolls disponibles</label>
-            <input type="number" id="srRolls" min="1" value="68">
-          </div>
-        </div>
-        <label>Nombre de wishes souhaités</label>
-        <input type="number" id="srWanted" min="1" value="1" style="max-width:160px;">
-        <div class="btn-row">
-          <button class="btn-primary" id="srCalcBtn">Calculer le taux</button>
-        </div>
-        <div class="stat-grid" id="srResult" style="margin-top:12px;"></div>
-        <div class="warn-box">Formule reprise du Wish Spawnrate Calculator de Svessinn (calculs de davidebic). Approximations : de grosses disable lists et un personal rare de 3 ou plus donnent des résultats peu fiables.</div>
-      </div>
-
-      <div class="card">
-        <h2><span class="num">2</span>Investissement optimal</h2>
-        <div class="grid-2">
-          <div>
-            <label>Rolls par heure au total</label>
-            <input type="number" id="bwTotalRolls" min="1" value="68">
-          </div>
           <div>
             <label>Rolls bonus investissables</label>
             <input type="number" id="bwInvestable" min="0" value="60">
-          </div>
-        </div>
-        <div class="grid-2">
-          <div>
-            <label>Bonus wishlist déjà acquis (%)</label>
-            <input type="number" id="bwBaseBonus" min="0" value="150">
           </div>
           <div>
             <label>Rolls déjà investis dans $bw</label>
@@ -564,109 +511,155 @@
         <div class="btn-row">
           <button class="btn-primary" id="bwCalcBtn">Calculer l'optimum</button>
         </div>
+        <div class="status" id="bwStatus"></div>
+
+        <details class="stats-advanced">
+          <summary>Réglages avancés — remplis automatiquement par Mes stats</summary>
+          <div class="grid-2">
+            <div>
+              <label>Wishes dans ton type de roll</label>
+              <input type="number" id="srWishes" min="0" value="100">
+            </div>
+            <div>
+              <label>Rolls disponibles au total</label>
+              <input type="number" id="srRolls" min="1" value="68">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div>
+              <label>Boost wishlist en %</label>
+              <input type="number" id="srBadgeBoost" min="0" value="150">
+            </div>
+            <div>
+              <label>Boost star wish en %</label>
+              <input type="number" id="srStarBoost" min="0" value="0">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div>
+              <label>Personnages non claim</label>
+              <input type="number" id="srUnclaimed" min="0" value="1000">
+            </div>
+            <div>
+              <label>Taille totale du pool</label>
+              <input type="number" id="srTotal" min="1" value="2000">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div>
+              <label>Personnages désactivés</label>
+              <input type="number" id="srDisabled" min="0" value="0">
+            </div>
+            <div>
+              <label>Personal rare</label>
+              <input type="number" id="srPersonalRare" min="0" step="0.1" value="1">
+            </div>
+          </div>
+          <label>Wish protection rate (1/X)</label>
+          <input type="number" id="srWishProtection" min="1" value="5000" style="max-width:160px;">
+        </details>
       </div>
 
       <div class="card" id="bwResultCard" style="display:none;">
         <h2>Résultat</h2>
         <div class="stat-grid" id="bwStats"></div>
         <div class="output-box" id="bwCommand" style="margin-top:12px;"></div>
+        <p class="hint" id="bwBoosts"></p>
         <div class="btn-row"><button class="small-btn" id="bwCopyBtn">Copier la commande</button></div>
-        <h2 style="margin-top:20px;">Rendement selon l'investissement</h2>
-        <p class="hint">Wishes attendus par heure en valeur relative. La barre orange est l'optimum.</p>
+        <h2 style="margin-top:20px;">Wishes attendus selon l'investissement</h2>
+        <p class="hint">Trop peu investi : beaucoup de rolls mais peu de chances. Trop investi : de bonnes chances mais peu de rolls. La barre pleine est l'équilibre.</p>
         <div class="bar-chart" id="bwChart"></div>
       </div>
+
+      <details class="card">
+        <summary>Comment fonctionne $boostwish</summary>
+        <p>$bw échange des rolls bonus permanents contre du boost de spawn sur ta wishlist. Rendement dégressif par roll investi : <b>+20%</b> les 5 premiers, <b>+15%</b> jusqu'à 15, <b>+10%</b> jusqu'à 100, <b>+5%</b> jusqu'à 200, <b>+1%</b> au-delà. Chaque roll investi ajoute aussi +10% de boost star wish.</p>
+        <p>Compromis : les rolls investis ne sont plus lancés. L'optimum maximise le <b>nombre de wishes attendus</b> = chance par roll × rolls restants.</p>
+        <div class="warn-box">Les rolls empilés ($us) ne sont pas boostés, et seuls les rolls bonus issus des upgrades sont investissables. Cooldown de 12 h pour redescendre.<br><br>Formule identique au Wish Spawnrate Calculator de Svessinn (calculs de davidebic). De grosses disable lists ou un personal rare de 3+ donnent des résultats peu fiables.</div>
+      </details>
     </section>
 
     <section id="panel-haremsort" class="panel">
       <h1>Tri du Harem ($sm)</h1>
       <p class="subtitle">Séries et personnages dans un seul trieur, mélangés dans l'ordre que tu veux.</p>
 
-      <div class="grid-2">
-        <div class="card">
-          <h2>Importer des personnages ($mm)</h2>
-          <label>Un personnage par ligne</label>
-          <textarea id="sortCharInput" placeholder="Garfield
-Bugs Bunny
-Lab Member No. 004"></textarea>
-          <div class="btn-row">
-            <button class="btn-primary" id="sortCharParse">Ajouter au trieur</button>
+      <div class="card">
+        <h2><span class="num">1</span>Importer</h2>
+        <div class="grid-2">
+          <div>
+            <label>Personnages ($mm)</label>
+            <textarea id="sortCharInput" rows="4" placeholder="Garfield&#10;Bugs Bunny&#10;Lab Member No. 004"></textarea>
+            <div class="btn-row">
+              <button class="small-btn" id="sortCharParse">Ajouter au trieur</button>
+            </div>
+          </div>
+          <div>
+            <label>Séries ($mmb)</label>
+            <textarea id="sortSeriesInput" rows="4" placeholder="Attack on Titan - 9/94&#10;Bambi - 1/9"></textarea>
+            <div class="btn-row">
+              <button class="small-btn" id="sortSeriesParse">Ajouter au trieur</button>
+            </div>
           </div>
         </div>
-
-        <div class="card">
-          <h2>Importer des séries ($mmb)</h2>
-          <label>Une série par ligne, format « Nom - possédés/total »</label>
-          <textarea id="sortSeriesInput" placeholder="Attack on Titan - 9/94
-Bambi - 1/9"></textarea>
-          <div class="btn-row">
-            <button class="btn-primary" id="sortSeriesParse">Ajouter au trieur</button>
-          </div>
+        <div class="radio-row">
+          <label><input type="checkbox" id="sortReplace"> Remplacer les entrées du même type</label>
         </div>
+        <div class="status" id="sortStatus"></div>
       </div>
 
+      <div class="grid-2 grid-start">
       <div class="card">
-        <h2>Trieur unifié</h2>
-        <div class="radio-row">
-          <label><input type="checkbox" id="sortReplace"> Remplacer les entrées du même type à l'import</label>
-        </div>
+        <h2><span class="num">2</span>Ordonner</h2>
         <div class="btn-row">
-          <button class="small-btn" id="sortAbc">Trier A-Z</button>
+          <button class="small-btn" id="sortAbc">A-Z</button>
           <button class="small-btn" id="sortReverseList">Inverser</button>
           <button class="small-btn" id="sortGroupKind">Séries puis persos</button>
           <button class="small-btn" id="sortByCompletion">Par complétion</button>
           <button class="small-btn" id="sortClear">Vider</button>
+          <button class="small-btn" id="sortVersionsBtn" type="button">Versions</button>
         </div>
-        <div class="status" id="sortStatus"></div>
         <p class="hint" id="sortCount"></p>
-        <p class="hint">Glisse-dépose pour mélanger librement séries et personnages. La couleur de la bordure distingue les deux : violet pour les personnages, sarcelle pour les séries.</p>
         <div class="wish-list" id="sortList"></div>
       </div>
 
       <div class="card">
-        <h2>Génération des commandes</h2>
-
-        <label>Type de tri</label>
-        <select id="sortMode">
-          <option value="order" selected>Ordre du trieur ci-dessus</option>
-          <option value="note">Par note — $sm note</option>
-          <option value="flag">Par tag / flag — $sm$mmw re:zero</option>
-          <option value="abc">Alphabétique — $sm abc</option>
-          <option value="reverse">Inversé — $sm reverse</option>
-        </select>
-
-        <div id="sortFlagWrap" style="display:none;">
-          <label>Flag complet (sans le $ initial)</label>
-          <input type="text" id="sortFlag" placeholder="mmw re:zero">
-          <p class="hint">Exemples : <code>mmw re:zero</code> donne <code>$sm$mmw re:zero</code>, <code>fnw note</code> donne <code>$sm$fnw note</code>.</p>
-        </div>
-
-        <div id="sortAnchorWrap">
-          <div class="radio-row">
-            <label><input type="checkbox" id="sortAnchored"> Insérer après un point de référence ($smp)</label>
-          </div>
-          <input type="text" id="sortAnchor" placeholder="Personnage ou série servant de repère">
-        </div>
-
-        <div id="sortChunkWrap">
-          <label>Entrées par commande</label>
-          <input type="number" id="sortChunk" min="1" value="20" style="max-width:140px;">
-        </div>
-
-        <label>Commandes générées</label>
+        <h2><span class="num">3</span>Commandes</h2>
         <div class="output-box" id="sortOutput"></div>
         <div class="btn-row">
           <button class="small-btn" id="sortCopyBtn">Tout copier</button>
-          <button class="small-btn" id="sortCopyCleanBtn">Copier sans les commentaires</button>
+          <button class="small-btn" id="sortCopyCleanBtn">Sans les commentaires</button>
         </div>
+        <p class="hint">À coller de haut en bas : l'ordre est déjà calculé pour ça.</p>
 
-        <div class="info-box">
-          <b>Ordre inverse, volontairement.</b> <code>$sm</code> remonte les entrées citées en tête du harem — colle les lignes générées de haut en bas sans réfléchir, l'ordre est déjà calculé pour ça.<br><br>
-          <b>Séries et personnages restent séparés.</b> Chaque suite d'un même type devient sa propre commande. En mode <code>$smp</code>, chaque bloc s'accroche au dernier élément du précédent pour préserver l'ordre.
-        </div>
+        <details class="stats-advanced">
+          <summary>Options de tri</summary>
+          <label>Type de tri</label>
+          <select id="sortMode">
+            <option value="order" selected>Ordre du trieur ci-dessus</option>
+            <option value="note">Par note — $sm note</option>
+            <option value="flag">Par tag / flag — $sm$mmw re:zero</option>
+            <option value="abc">Alphabétique — $sm abc</option>
+            <option value="reverse">Inversé — $sm reverse</option>
+          </select>
 
-        <div class="warn-box">
-          Le tri chronologique n'est volontairement pas proposé : aucun mode de cette interface ne le génère.
-        </div>
+          <div id="sortFlagWrap" style="display:none;">
+            <label>Flag complet (sans le $ initial)</label>
+            <input type="text" id="sortFlag" placeholder="mmw re:zero">
+          </div>
+
+          <div id="sortAnchorWrap">
+            <div class="radio-row">
+              <label><input type="checkbox" id="sortAnchored"> Insérer après un point de référence ($smp)</label>
+            </div>
+            <input type="text" id="sortAnchor" placeholder="Personnage ou série servant de repère">
+          </div>
+
+          <div id="sortChunkWrap">
+            <label>Entrées par commande (0 = remplir au maximum)</label>
+            <input type="number" id="sortChunk" min="0" value="0" style="max-width:140px;">
+          </div>
+        </details>
+      </div>
       </div>
     </section>
 
@@ -687,6 +680,7 @@ Kiki ·   (1) - https://mudae.net/uploads/8461491/BbQaFi0~mIGi658.png"></textare
       </div>
 
       <div id="colorWorkspace" style="display:none;">
+        <div class="grid-2 grid-start grid-wide">
         <div class="card">
           <h2><span class="num">2</span>Attribuer les couleurs</h2>
           <p class="hint">Sélecteur natif, palette rapide, ou extraction depuis l'image. Chaque changement met à jour les commandes en bas.</p>
@@ -695,6 +689,7 @@ Kiki ·   (1) - https://mudae.net/uploads/8461491/BbQaFi0~mIGi658.png"></textare
             <button class="small-btn" id="colorApplyAll">Appliquer à tous</button>
             <button class="small-btn" id="colorExtractAll">Extraire depuis les images</button>
             <button class="small-btn" id="colorClearAll">Tout effacer</button>
+            <button class="small-btn" id="colorVersionsBtn" type="button">Versions</button>
           </div>
           <div class="harem-list" id="colorList"></div>
         </div>
@@ -713,43 +708,87 @@ Kiki ·   (1) - https://mudae.net/uploads/8461491/BbQaFi0~mIGi658.png"></textare
             <button class="small-btn" id="colorCopyBtn">Copier</button>
           </div>
         </div>
-      </div>
-    </section>
-
-    <section id="panel-stats" class="panel">
-      <h1>Mes statistiques</h1>
-      <p class="subtitle">Colle ta sortie $bonus pour que les autres onglets s'alignent sur tes vraies limites.</p>
-
-      <div class="card">
-        <h2><span class="num">1</span>Coller le bloc</h2>
-        <label>Sortie brute de $bonus (ou équivalent)</label>
-        <textarea id="statsInput" placeholder="Rolls par heure : +7
-Slots de $wishlist : +8
-Kakera loot : +12%"></textarea>
-        <div class="btn-row">
-          <button class="btn-primary" id="statsParseBtn">Analyser</button>
-          <button id="statsApplyBtn">Propager vers les autres onglets</button>
-        </div>
-        <div class="status" id="statsStatus"></div>
-      </div>
-
-      <div class="card">
-        <h2><span class="num">2</span>Valeurs extraites</h2>
-        <div class="stat-grid" id="statsResult"></div>
-        <div class="info-box">
-          <b>Ce que ces valeurs pilotent</b>
-          <ul class="tips">
-            <li><code>wishlistSlots</code> → limite affichée dans le Wish Formator (passe en rouge si dépassée)</li>
-            <li><code>rollsPerHour</code> → optimiseur $bw et taux d'apparition</li>
-            <li><code>wishlistBoost</code> / <code>firstWishBoost</code> → formule de spawn</li>
-            <li><code>bonusRolls</code> → maximum investissable dans $bw</li>
-          </ul>
-          <p class="hint">Le parseur garde aussi les autres lignes chiffrées rencontrées, même non utilisées pour l'instant.</p>
         </div>
       </div>
     </section>
 
   </main>
+</div>
+
+<div class="modal-backdrop" id="statsModalBackdrop" style="display:none;">
+  <div class="modal modal-lg" id="statsModal" role="dialog" aria-modal="true" aria-labelledby="statsModalTitle">
+    <div class="modal-head">
+      <h3 id="statsModalTitle">Mes statistiques</h3>
+      <button class="modal-close" id="statsModalClose" type="button" aria-label="Fermer">×</button>
+    </div>
+    <p class="sub">Colle chaque sortie de commande. Tout se remplit et se propage automatiquement.</p>
+
+    <div class="paste-grid">
+      <div class="paste-block">
+        <label for="statsInput"><code>$bonus</code><span>rolls, slots, boosts</span></label>
+        <textarea id="statsInput" rows="3" placeholder="Rolls par heure : +7&#10;Slots de $wishlist : +8"></textarea>
+        <p class="paste-result" id="statsOutBonus"></p>
+      </div>
+
+      <div class="paste-block">
+        <label for="statsLeftInput"><code>$left</code><span>personnages restants et total</span></label>
+        <textarea id="statsLeftInput" rows="4" placeholder="Waifu restantes : 47.088/47.562 animanga + 35.478/35.615 game&#10;Husbando restants : 48.523/48.913 animanga + 30.809/30.908 game&#10;Total restant : 92.437/93.216 animanga + 61.281/61.464 game"></textarea>
+        <div class="paste-extra">
+          <label for="statsRollType">Ton type de roll</label>
+          <select id="statsRollType">
+            <option value="wa">$wa — Waifu animanga</option>
+            <option value="wg">$wg — Waifu game</option>
+            <option value="w">$w — Waifu (animanga + game)</option>
+            <option value="ha">$ha — Husbando animanga</option>
+            <option value="hg">$hg — Husbando game</option>
+            <option value="h">$h — Husbando (animanga + game)</option>
+            <option value="ma">$ma — Tous genres, animanga</option>
+            <option value="mg">$mg — Tous genres, game</option>
+            <option value="m">$m — Tout</option>
+          </select>
+        </div>
+        <p class="paste-result" id="statsOutLeft"></p>
+      </div>
+
+      <div class="paste-block">
+        <label for="statsWishesInput"><code>$wl</code><span>nombre de wishes de ton type de roll</span></label>
+        <textarea id="statsWishesInput" rows="3" placeholder="Un personnage par ligne, ou juste le nombre"></textarea>
+        <p class="paste-result" id="statsOutWishes"></p>
+      </div>
+
+      <div class="paste-block">
+        <label for="statsDisabledInput"><code>$dld</code><span>personnages désactivés</span></label>
+        <textarea id="statsDisabledInput" rows="3" placeholder="0"></textarea>
+        <p class="paste-result" id="statsOutDisabled"></p>
+      </div>
+
+      <div class="paste-block">
+        <label for="statsRareInput"><code>$persr</code><span>personal rare</span></label>
+        <textarea id="statsRareInput" rows="3" placeholder="1"></textarea>
+        <p class="paste-result" id="statsOutRare"></p>
+      </div>
+    </div>
+
+    <details class="stats-advanced">
+      <summary>Valeurs de base</summary>
+      <div class="grid-2">
+        <div>
+          <label>Slots de wishlist de base</label>
+          <input type="number" id="statsBaseSlots" min="0" value="7">
+        </div>
+        <div>
+          <label>Rolls de base</label>
+          <input type="number" id="statsBaseRolls" min="0" value="16">
+        </div>
+      </div>
+      <p class="hint">$bonus n'affiche que le surplus : ces bases s'additionnent automatiquement.</p>
+    </details>
+
+    <div class="btn-row">
+      <button class="btn-primary" id="statsParseBtn">Appliquer</button>
+    </div>
+    <div class="status" id="statsStatus"></div>
+  </div>
 </div>
 
 <script src="js/assets.js"></script>
