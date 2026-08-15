@@ -1,0 +1,1 @@
+<?php header("Location: http://floatzel.net/pokemon/black-white/sprites/"); ?>

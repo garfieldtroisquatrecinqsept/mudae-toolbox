@@ -1,0 +1,781 @@
+/* ============================================================
+   COMPOSANTS — couche 2 : chargé après style.css
+   ============================================================ */
+
+body{
+  font-family:var(--font-sans);
+  font-size:var(--t-base);
+  line-height:var(--lh-normal);
+  -webkit-font-smoothing:antialiased;
+  background:var(--bg);
+  /* Le halo/dégradé de fond vit uniquement dans .bg-fx (fixe,
+     derrière toute la page) : une seconde couche de dégradé statique
+     ici créait une couture visible à la jonction hero/topbar. */
+}
+
+/* ---- Focus visible partout : priorité 1 ---- */
+:focus-visible{
+  outline:none;
+  box-shadow:var(--focus-ring);
+  border-radius:var(--r-sm);
+}
+
+/* ---- Barre de navigation : pas de fond propre, le fond animé
+   du site (.bg-fx) est visible partout, sans rupture. Un fond même
+   translucide + flou ici créait un rectangle visiblement plus clair
+   que le hero au-dessus et les panels en dessous — le site doit
+   avoir un seul et même fond continu du haut en bas. ---- */
+/* Pas de sticky : le bandeau (marque + carrousel) reste à sa place
+   juste sous le hero, dans le flux normal de la page. */
+.topbar{
+  padding:var(--s-5) 0 var(--s-3);
+}
+
+.topbar-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:var(--s-3);
+  margin-bottom:var(--s-4);
+}
+.brand{
+  font-size:var(--t-xl);
+  letter-spacing:-.02em;
+  margin-bottom:0;
+}
+
+.theme-toggle{
+  flex:none;
+  width:38px;height:38px;
+  min-height:auto;
+  padding:0;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text);
+}
+.theme-icon{width:18px;height:18px;}
+.theme-icon-sun{display:none;}
+:root[data-theme="light"] .theme-icon-moon{display:none;}
+:root[data-theme="light"] .theme-icon-sun{display:block;}
+.brand-mark{
+  background:linear-gradient(135deg,var(--fg),#8a8a8a);
+  box-shadow:0 0 16px rgba(var(--fg-rgb),.35);
+}
+.gem{
+  background:linear-gradient(135deg,var(--fg),#8a8a8a);
+}
+
+.tab-btn{
+  min-height:38px;
+  padding:var(--s-2) var(--s-4);
+  font-size:var(--t-sm);
+  font-weight:var(--fw-semi);
+  background:transparent;
+  border-color:rgba(var(--fg-rgb),.18);
+  color:rgba(var(--fg-rgb),.72);
+  transition:color var(--d-fast) var(--ease-out),
+             border-color var(--d-fast) var(--ease-out),
+             background var(--d-fast) var(--ease-out),
+             transform var(--d-fast) var(--ease-out);
+}
+.tab-btn:hover{
+  transform:translateY(-1px);
+  background:rgba(var(--fg-rgb),.06);
+  border-color:rgba(var(--fg-rgb),.4);
+  color:var(--fg);
+}
+.tab-btn.active{
+  background:rgba(var(--fg-rgb),.08);
+  border-color:rgba(var(--fg-rgb),.6);
+  color:var(--fg);
+  box-shadow:var(--glow-mono);
+}
+
+/* ---- Cartes ---- */
+.card{
+  background:linear-gradient(180deg, var(--surface) 0%, var(--n-900) 100%);
+  border-color:var(--border-subtle);
+  border-radius:var(--r-lg);
+  padding:var(--s-5) var(--s-6);
+  margin-bottom:var(--s-4);
+  box-shadow:var(--e-2);
+  transition:border-color var(--d-base) var(--ease-out),
+             box-shadow var(--d-base) var(--ease-out);
+}
+.card:hover{
+  border-color:var(--border);
+  box-shadow:var(--e-3);
+}
+.card h2{
+  font-size:var(--t-lg);
+  font-weight:var(--fw-semi);
+  letter-spacing:-.01em;
+  margin-bottom:var(--s-1);
+}
+.card h2 .num{
+  width:24px;height:24px;
+  background:transparent;
+  border:1.5px solid rgba(var(--fg-rgb),.4);
+  color:var(--fg);
+  font-weight:var(--fw-bold);
+  box-shadow:none;
+}
+
+h1{
+  font-family:var(--font-display);
+  font-size:var(--t-2xl);
+  font-weight:var(--fw-bold);
+  letter-spacing:-.025em;
+  margin:var(--s-6) 0 var(--s-1);
+}
+.subtitle{
+  font-size:var(--t-base);
+  color:var(--text-dim);
+  margin-bottom:var(--s-6);
+  max-width:70ch;
+}
+
+/* ---- Formulaires ---- */
+label{
+  font-size:var(--t-xs);
+  color:var(--text-dim);
+  letter-spacing:.05em;
+  margin:var(--s-4) 0 var(--s-2);
+}
+
+input[type=text],input[type=number],input[type=url],textarea,select{
+  min-height:var(--touch-min);
+  padding:var(--s-3) var(--s-3);
+  border-color:var(--border-subtle);
+  border-radius:var(--r-md);
+  font-size:var(--t-base);
+  transition:border-color var(--d-fast) var(--ease-out),
+             box-shadow var(--d-fast) var(--ease-out),
+             background var(--d-fast) var(--ease-out);
+}
+input[type=text]:hover,input[type=number]:hover,input[type=url]:hover,
+textarea:hover,select:hover{
+  border-color:var(--border);
+}
+input[type=text]:focus,input[type=number]:focus,input[type=url]:focus,
+textarea:focus,select:focus{
+  outline:none;
+  border-color:rgba(var(--fg-rgb),.55);
+  box-shadow:0 0 0 3px rgba(var(--fg-rgb),.1);
+  background:var(--surface3);
+}
+textarea{
+  line-height:var(--lh-relaxed);
+  min-height:120px;
+}
+
+.quick-add-row{display:flex;gap:var(--s-2);align-items:stretch;}
+.quick-add-row input{flex:1;min-width:0;}
+.quick-add-row button{flex:none;}
+
+/* Champ de recherche avec icône */
+.search-field{position:relative;}
+.search-field input{padding-left:var(--s-10);}
+.search-field .search-icon{
+  position:absolute;
+  left:var(--s-3);
+  top:50%;
+  transform:translateY(-50%);
+  width:18px;height:18px;
+  color:var(--text-faint);
+  pointer-events:none;
+}
+.search-field input:focus ~ .search-icon{color:var(--fg);}
+
+/* ---- Boutons ghost : fond transparent, liseré fin, reflet balayant
+   au survol. Exclusivement ce style dans toute l'interface. ---- */
+button{
+  min-height:var(--touch-min);
+  padding:var(--s-3) var(--s-4);
+  font-size:var(--t-sm);
+  font-weight:var(--fw-semi);
+  background:transparent;
+  color:var(--text);
+  border:1px solid rgba(var(--fg-rgb),.18);
+  border-radius:var(--r-md);
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  transition:transform var(--d-fast) var(--ease-out),
+             border-color var(--d-fast) var(--ease-out),
+             background var(--d-fast) var(--ease-out),
+             box-shadow var(--d-fast) var(--ease-out);
+}
+button::before{
+  content:"";
+  position:absolute;
+  top:0;left:-60%;
+  width:45%;height:100%;
+  background:linear-gradient(115deg, transparent, rgba(var(--fg-rgb),.12), transparent);
+  transform:skewX(-18deg);
+  transition:left .7s var(--ease-out);
+  pointer-events:none;
+  z-index:-1;
+}
+button:hover::before{left:140%;}
+.carousel-card::before{display:none;}
+button:hover{
+  background:rgba(var(--fg-rgb),.05);
+  border-color:rgba(var(--fg-rgb),.4);
+  transform:translateY(-1px);
+}
+button:active{
+  transform:translateY(0) scale(.985);
+  transition-duration:var(--d-instant);
+}
+
+.btn-primary{
+  background:transparent;
+  border:1px solid rgba(var(--fg-rgb),.55);
+  box-shadow:none;
+  color:var(--fg);
+}
+.btn-primary:hover{
+  background:rgba(var(--fg-rgb),.1);
+  border-color:var(--fg);
+  box-shadow:0 0 26px rgba(var(--fg-rgb),.16);
+}
+
+.small-btn{
+  min-height:32px;
+  padding:var(--s-1) var(--s-3);
+  font-size:var(--t-xs);
+}
+
+.btn-row{gap:var(--s-2);margin-top:var(--s-4);}
+
+/* ---- Badges ---- */
+.badge{
+  font-size:10px;
+  font-weight:var(--fw-bold);
+  padding:3px var(--s-2);
+  letter-spacing:.04em;
+  white-space:nowrap;
+  transition:transform var(--d-fast) var(--ease-spring);
+}
+.badge:hover{transform:scale(1.06);}
+
+/* ---- Cartes de statistiques ---- */
+.stat-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:var(--s-3);
+  margin-top:var(--s-4);
+}
+.stat-card{
+  background:linear-gradient(160deg, var(--surface2), var(--n-900));
+  border:1px solid var(--border-subtle);
+  border-radius:var(--r-md);
+  padding:var(--s-4);
+  position:relative;
+  overflow:hidden;
+  transition:border-color var(--d-base) var(--ease-out),
+             transform var(--d-base) var(--ease-out);
+}
+.stat-card:hover{
+  border-color:var(--border);
+  transform:translateY(-2px);
+}
+.stat-card::after{
+  content:"";
+  position:absolute;
+  inset:0 0 auto 0;
+  height:2px;
+  background:linear-gradient(90deg, var(--accent, var(--fg)), transparent);
+}
+.stat-card .sc-label{
+  font-size:var(--t-xs);
+  color:var(--text-dim);
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  font-weight:var(--fw-semi);
+}
+.stat-card .sc-value{
+  font-family:var(--font-mono);
+  font-size:var(--t-2xl);
+  font-weight:var(--fw-bold);
+  line-height:var(--lh-tight);
+  color:var(--accent, var(--fg));
+  margin-top:var(--s-1);
+  font-variant-numeric:tabular-nums;
+  overflow-wrap:break-word;
+  word-break:break-word;
+}
+.stat-card .sc-hint{
+  font-size:var(--t-xs);
+  color:var(--text-faint);
+  margin-top:var(--s-1);
+}
+
+/* ---- Squelettes de chargement ---- */
+.skeleton{
+  position:relative;
+  overflow:hidden;
+  background:var(--surface2);
+  border-radius:var(--r-md);
+}
+.skeleton::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  transform:translateX(-100%);
+  background:linear-gradient(90deg,
+    transparent,
+    rgba(var(--fg-rgb),.09) 45%,
+    rgba(var(--fg-rgb),.15) 55%,
+    transparent);
+  animation:shimmer 1.4s infinite;
+}
+@keyframes shimmer{ to{ transform:translateX(100%); } }
+
+.skeleton-row{
+  display:flex;align-items:center;gap:var(--s-3);
+  background:var(--surface2);
+  border:1px solid var(--border-subtle);
+  border-radius:var(--r-md);
+  padding:var(--s-3) var(--s-4);
+  margin-bottom:var(--s-2);
+}
+.skeleton-row .sk-rank{width:26px;height:26px;border-radius:50%;flex:none;}
+.skeleton-row .sk-name{height:14px;flex:1;}
+.skeleton-row .sk-badge{height:18px;width:64px;border-radius:var(--r-full);flex:none;}
+
+/* ---- Liste triable ---- */
+.wish-item{
+  gap:var(--s-3);
+  padding:var(--s-3) var(--s-4);
+  border-color:var(--border-subtle);
+  border-radius:var(--r-md);
+  background:linear-gradient(180deg, var(--surface2), var(--n-900));
+  min-height:var(--touch-min);
+  transition:border-color var(--d-fast) var(--ease-out),
+             transform var(--d-fast) var(--ease-out),
+             box-shadow var(--d-fast) var(--ease-out),
+             opacity var(--d-fast) var(--ease-out);
+}
+.wish-item:hover{
+  border-color:var(--border-strong);
+  transform:translateX(2px);
+  box-shadow:var(--e-2);
+}
+.wish-item.dragging{
+  opacity:.45;
+  transform:scale(.99);
+  box-shadow:var(--e-4);
+}
+.wish-item.drop-target{
+  border-color:var(--teal);
+  box-shadow:var(--glow-teal);
+  transform:translateX(6px);
+}
+.wish-item .rank{
+  font-family:var(--font-mono);
+  font-variant-numeric:tabular-nums;
+  background:var(--n-950);
+  border-color:var(--border-subtle);
+}
+.wish-item .grip{
+  font-size:16px;
+  color:var(--text-faint);
+  transition:color var(--d-fast) var(--ease-out);
+}
+.wish-item:hover .grip{color:var(--purple-ink);}
+.wish-item .wname{font-size:var(--t-base);font-weight:var(--fw-semi);}
+
+/* ---- Modale ---- */
+.modal-backdrop{
+  background:rgba(8,6,12,.78);
+  backdrop-filter:blur(6px);
+  animation:fadeIn var(--d-base) var(--ease-out);
+}
+.modal{
+  background:linear-gradient(180deg, var(--surface), var(--n-900));
+  border-color:var(--border);
+  border-radius:var(--r-xl);
+  padding:var(--s-6);
+  box-shadow:var(--e-4);
+  animation:modalIn var(--d-base) var(--ease-spring);
+}
+@keyframes fadeIn{ from{opacity:0} to{opacity:1} }
+@keyframes modalIn{
+  from{opacity:0;transform:translateY(12px) scale(.97)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+.tag-option{
+  gap:var(--s-3);
+  padding:var(--s-3);
+  border-color:var(--border-subtle);
+  border-radius:var(--r-md);
+  margin-bottom:var(--s-2);
+  min-height:var(--touch-min);
+  transition:border-color var(--d-fast) var(--ease-out),
+             background var(--d-fast) var(--ease-out);
+}
+.tag-option:hover{background:var(--surface2);border-color:var(--border);}
+.tag-option.active{
+  border-color:var(--purple);
+  background:rgba(185,140,255,.09);
+}
+
+/* ---- Blocs d'information ---- */
+.info-box,.warn-box{
+  border-radius:var(--r-md);
+  padding:var(--s-3) var(--s-4);
+  margin-top:var(--s-3);
+  line-height:var(--lh-relaxed);
+  border-width:1px;
+  border-left-width:3px;
+}
+.output-box{
+  font-family:var(--font-mono);
+  font-size:var(--t-sm);
+  line-height:var(--lh-relaxed);
+  padding:var(--s-4);
+  border-color:var(--border-subtle);
+  border-radius:var(--r-md);
+}
+.solver-result{
+  border-color:var(--border-subtle);
+  border-radius:var(--r-md);
+  padding:var(--s-4);
+}
+.stat-row{
+  padding:var(--s-2) 0;
+  border-color:var(--border-subtle);
+}
+.stat-row b{font-family:var(--font-mono);font-variant-numeric:tabular-nums;}
+
+.hint{font-size:var(--t-xs);line-height:var(--lh-relaxed);}
+.status{
+  border-radius:var(--r-md);
+  padding:var(--s-3) var(--s-4);
+  border:1px solid var(--border-subtle);
+  border-left-width:3px;
+  line-height:var(--lh-relaxed);
+}
+.status.ok{border-left-color:var(--teal);}
+.status.warn{border-left-color:var(--orange);}
+.status.error{border-left-color:var(--red);}
+
+/* ---- Grilles d'assets ---- */
+.asset,.poke-card{
+  border-color:var(--border-subtle);
+  border-radius:var(--r-md);
+  transition:border-color var(--d-fast) var(--ease-out),
+             transform var(--d-fast) var(--ease-out),
+             box-shadow var(--d-fast) var(--ease-out);
+}
+.asset:hover,.poke-card:hover{
+  transform:translateY(-2px);
+  box-shadow:var(--e-2);
+}
+.asset.selected,.poke-card.selected{border-color:rgba(var(--fg-rgb),.55);box-shadow:var(--glow-mono);}
+
+/* ---- Grille des solvers ---- */
+.cell{
+  border-radius:var(--r-md);
+  border-color:var(--border-subtle);
+  transition:transform var(--d-fast) var(--ease-out),
+             box-shadow var(--d-fast) var(--ease-out);
+}
+.cell:hover{transform:scale(1.05);z-index:1;}
+.cell.best{box-shadow:0 0 0 3px var(--fg) inset, 0 0 16px rgba(var(--fg-rgb),.3);}
+
+/* ============================================================
+   IDENTITÉ PAR ONGLET — accent thématique additif, posé sur le
+   conteneur #panel-* existant. Purement visuel : n'affecte ni la
+   structure, ni les IDs, ni la logique de bascule d'onglet.
+   ============================================================ */
+#panel-sprites, #panel-cropper, #panel-solvers, #panel-wish, #panel-boost,
+#panel-haremsort, #panel-colors, #panel-stats{
+  --panel-accent:var(--fg);
+  --panel-accent-2:#9a9a9a;
+  --panel-glow:var(--glow-mono);
+}
+
+.panel h1{
+  position:relative;
+  padding-left:var(--s-4);
+}
+.panel h1::before{
+  content:"";
+  position:absolute;
+  left:0;top:.14em;bottom:.14em;
+  width:4px;border-radius:var(--r-full);
+  background:linear-gradient(180deg, var(--panel-accent, var(--fg)), transparent);
+}
+
+.panel .card h2 .num{
+  background:transparent;
+  border-color:rgba(var(--fg-rgb),.4);
+}
+
+.panel .card:hover{
+  box-shadow:var(--e-3), var(--panel-glow, var(--glow-mono));
+}
+
+.panel .tab-btn.solver-tab.active{
+  border-color:var(--panel-accent, var(--fg));
+  color:var(--panel-accent, var(--fg));
+}
+
+/* ---- Skeletons additionnels : vignettes / lignes de texte ---- */
+.skeleton-thumb{width:56px;height:56px;border-radius:var(--r-md);flex:none;}
+.skeleton-line{height:9px;border-radius:var(--r-sm);}
+.skeleton-poke{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  padding:6px 4px 8px;border-radius:var(--r-md);
+  background:var(--surface2);border:1px solid var(--border-subtle);
+}
+.skeleton-poke .skeleton-line{width:70%;}
+
+/* ---- Cartes personnage (onglet Couleurs) : la carte s'enroule
+   plutôt que d'écraser le nom quand les contrôles couleur manquent
+   de place ---- */
+.harem-item{
+  flex-wrap:wrap;
+  transition:transform var(--d-fast) var(--ease-out), box-shadow var(--d-base) var(--ease-out);
+}
+.harem-item .hbody{flex:1 1 160px;min-width:140px;}
+.hcolors{
+  display:flex;align-items:center;gap:var(--s-2);flex-wrap:wrap;
+  flex:1 1 260px;min-width:200px;
+}
+
+/* Halo par palier de rareté (kakera) : inspiré d'une carte profil à
+   glow par tier trouvée via le MCP 21st, adapté en CSS pur au lieu
+   du composant React/Tailwind d'origine. */
+.harem-item.k-none{ --tier-glow:0 0 0 1px rgba(var(--fg-rgb),.12); }
+.harem-item.k-low{  --tier-glow:0 0 0 1px rgba(var(--fg-rgb),.24), 0 0 10px rgba(var(--fg-rgb),.14); }
+.harem-item.k-mid{  --tier-glow:0 0 0 1px rgba(var(--fg-rgb),.36), 0 0 14px rgba(var(--fg-rgb),.2); }
+.harem-item.k-high{ --tier-glow:0 0 0 1px rgba(var(--fg-rgb),.48), 0 0 18px rgba(var(--fg-rgb),.26); }
+.harem-item.k-top{  --tier-glow:0 0 0 1px rgba(var(--fg-rgb),.65), 0 0 24px rgba(var(--fg-rgb),.34); }
+
+.harem-item:hover{
+  transform:translateY(-2px);
+  box-shadow:var(--e-2), var(--tier-glow, var(--glow-mono));
+}
+
+/* ---- Vignettes personnage : avatar circulaire façon Discord, avec
+   halo permanent au palier de rareté (repris du glow "tier" de la
+   carte 21st, sur un avatar rond plutôt qu'un panneau 3D complet
+   pour rester cohérent avec les listes du reste du site) ---- */
+.harem-item .harem-avatar{
+  width:48px;height:48px;flex:none;object-fit:cover;
+  border-radius:50%;
+  border:2px solid var(--n-950);
+  background:var(--n-950);
+  box-shadow:var(--tier-glow, none);
+  transition:box-shadow var(--d-base) var(--ease-out), transform var(--d-fast) var(--ease-spring);
+}
+.harem-avatar-fallback{
+  width:48px;height:48px;flex:none;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;
+  border:2px solid var(--n-950);
+  background:var(--surface2);
+  color:var(--text-dim);
+  font-weight:var(--fw-bold);
+  font-size:var(--t-sm);
+  letter-spacing:.02em;
+  box-shadow:var(--tier-glow, none);
+  transition:background var(--d-base) var(--ease-out), color var(--d-base) var(--ease-out),
+             box-shadow var(--d-base) var(--ease-out), transform var(--d-fast) var(--ease-spring);
+}
+.harem-item:hover .harem-avatar,
+.harem-item:hover .harem-avatar-fallback{
+  transform:scale(1.08);
+}
+
+/* ---- Cartes ressources ---- */
+.res-list{
+  display:grid;
+  gap:var(--s-2);
+}
+.res-item{
+  display:flex;flex-direction:column;gap:2px;
+  border:1px solid var(--border-subtle);
+  border-bottom:1px solid var(--border-subtle);
+  border-radius:var(--r-md);
+  padding:var(--s-3) var(--s-4);
+  background:linear-gradient(180deg, var(--surface2), var(--n-900));
+  transition:border-color var(--d-fast) var(--ease-out),
+             transform var(--d-fast) var(--ease-out),
+             box-shadow var(--d-fast) var(--ease-out);
+}
+.res-item:hover{
+  border-color:var(--panel-accent, var(--fg));
+  transform:translateY(-2px);
+  box-shadow:var(--e-2);
+}
+.res-list .res-item:last-child{border-bottom:1px solid var(--border-subtle);}
+.res-item b{display:flex;align-items:center;gap:6px;}
+.res-item b::after{
+  content:"↗";
+  margin-left:auto;
+  font-size:12px;
+  color:var(--text-faint);
+  transition:transform var(--d-fast) var(--ease-out), color var(--d-fast) var(--ease-out);
+}
+.res-item:hover b::after{
+  color:var(--panel-accent, var(--fg));
+  transform:translate(1px,-1px);
+}
+
+/* ---- Toolbar pill (barre GIF du Cropper) ---- */
+.gif-bar{
+  border-radius:var(--r-full);
+  justify-content:center;
+  box-shadow:var(--e-1);
+}
+.gif-bar .small-btn{min-height:32px;}
+
+/* ---- Bloc de commandes : habillage "code" ---- */
+.output-box{
+  position:relative;
+  background:linear-gradient(180deg, var(--n-950), var(--surface2));
+  box-shadow:inset 0 1px 0 rgba(var(--fg-rgb),.03);
+}
+
+/* ---- Scrollbars sombres et cohérentes ---- */
+.asset-grid,.poke-results,.modal{
+  scrollbar-width:thin;
+  scrollbar-color:var(--border-strong) transparent;
+}
+.asset-grid::-webkit-scrollbar,.poke-results::-webkit-scrollbar,.modal::-webkit-scrollbar{width:8px;}
+.asset-grid::-webkit-scrollbar-thumb,.poke-results::-webkit-scrollbar-thumb,.modal::-webkit-scrollbar-thumb{
+  background:var(--border-strong);border-radius:var(--r-full);
+}
+.asset-grid::-webkit-scrollbar-track,.poke-results::-webkit-scrollbar-track,.modal::-webkit-scrollbar-track{background:transparent;}
+
+/* ============================================================
+   PASSE MONOCHROME — noir & blanc strict, reflets, micro-vie
+   Reprend la spécificité des sélecteurs d'origine pour gagner la
+   cascade sans !important. Seule la teinte change, jamais la
+   structure ni la logique.
+   ============================================================ */
+
+/* Badges de tags : mêmes libellés, plus aucune teinte */
+/* Les badges de statut du Wish Formator (wish/lock/star/owned/remove/
+   quiet/give/fw) redeviennent colorés : sur une longue liste de
+   personnages, la lisibilité en un coup d'œil l'emporte sur le
+   monochrome strict — demande explicite. kind-series/kind-char (Tri
+   Harem) restent neutres, cet onglet n'est pas concerné. */
+.badge.kind-series,.badge.kind-char{
+  background:transparent;
+  border:1px solid rgba(var(--fg-rgb),.32);
+  color:rgba(var(--fg-rgb),.78);
+}
+
+/* Bordures de statut des lignes wish-item : différenciées par style,
+   plus par teinte (pointillé = à retirer) */
+.wish-item.tag-owned{opacity:.5;}
+.wish-item.tag-remove{border-color:var(--red);border-style:dashed;}
+.wish-item.tag-lock{border-color:var(--yellow);}
+.wish-item.tag-star{border-color:var(--pink);}
+.wish-item.tag-quiet{border-color:var(--blue);}
+.wish-item:hover .grip{color:var(--fg);}
+.wish-item.drop-target{
+  border-color:rgba(var(--fg-rgb),.6);
+  box-shadow:0 0 0 1px rgba(var(--fg-rgb),.4), 0 0 16px rgba(var(--fg-rgb),.22);
+}
+
+/* Reflet balayant : limité aux cartes de contenu principales
+   (.card) pour rester discret. Pas de respiration permanente au
+   repos, pas d'effet sur stat-card/wish-item/res-item/harem-item —
+   moins de mouvement en continu, l'accent reste sur le survol. */
+.card{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+}
+.card::before{
+  content:"";
+  position:absolute;
+  top:0;left:-70%;
+  width:35%;height:100%;
+  background:linear-gradient(115deg, transparent, rgba(var(--fg-rgb),.04), transparent);
+  transform:skewX(-18deg);
+  transition:left .9s var(--ease-out);
+  pointer-events:none;
+  z-index:-1;
+}
+.card:hover::before{left:140%;}
+
+/* ---- Bulle de tags contextuelle (Wish Formator) : remplace le
+   modal plein écran par une petite bulle ancrée sur la carte
+   cliquée ---- */
+.tag-bubble{
+  position:absolute;
+  z-index:200;
+  background:rgba(10,10,10,.92);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(var(--fg-rgb),.22);
+  border-radius:var(--r-lg);
+  padding:var(--s-3);
+  box-shadow:var(--e-4);
+  min-width:220px;
+  animation:bubbleIn var(--d-base) var(--ease-spring);
+}
+@keyframes bubbleIn{
+  from{opacity:0;transform:translateY(-6px) scale(.96);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+.tag-bubble-tags{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:6px;
+  margin-bottom:var(--s-2);
+}
+.tag-bubble-btn{
+  min-height:34px;
+  padding:6px 10px;
+  font-size:var(--t-xs);
+  font-weight:var(--fw-semi);
+  background:transparent;
+  border:1px solid rgba(var(--fg-rgb),.2);
+  border-radius:var(--r-sm);
+  color:rgba(var(--fg-rgb),.7);
+}
+.tag-bubble-btn.active{
+  background:rgba(var(--fg-rgb),.12);
+  border-color:var(--fg);
+  color:var(--fg);
+}
+.tag-bubble-btn.tbb-star.active{background:rgba(255,127,209,.15);border-color:var(--pink);color:var(--pink-ink);}
+.tag-bubble-btn.tbb-lock.active{background:rgba(246,217,107,.15);border-color:var(--yellow);color:var(--yellow-ink);}
+.tag-bubble-btn.tbb-remove.active{background:rgba(255,107,128,.15);border-color:var(--red);color:var(--red-ink);}
+.tag-bubble-perk{
+  display:flex;align-items:center;justify-content:center;gap:var(--s-3);
+  padding:var(--s-2) 0;
+  border-top:1px solid rgba(var(--fg-rgb),.1);
+  border-bottom:1px solid rgba(var(--fg-rgb),.1);
+  margin-bottom:var(--s-2);
+}
+.tag-bubble-perk .small-btn{min-height:28px;width:28px;padding:0;border-radius:50%;}
+.tag-bubble-lvl{
+  font-family:var(--font-mono);
+  font-size:var(--t-sm);
+  font-variant-numeric:tabular-nums;
+  min-width:52px;
+  text-align:center;
+}
+.tag-bubble-delete{width:100%;}
+
+/* ---- Responsive ---- */
+@media (max-width:640px){
+  .app{padding:0 var(--s-4) var(--s-12);}
+  h1{font-size:var(--t-xl);}
+  .card{padding:var(--s-4);}
+  .tab-btn{padding:var(--s-2) var(--s-3);font-size:var(--t-xs);}
+  .brand{font-size:var(--t-lg);}
+  .wish-item{flex-wrap:wrap;}
+  .wish-item .badges{width:100%;padding-left:calc(26px + var(--s-3));}
+  .stat-grid{grid-template-columns:repeat(auto-fit,minmax(130px,1fr));}
+}
