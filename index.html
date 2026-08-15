@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mudae Toolbox</title>
+<script>
+  (function(){
+    try{
+      var saved = localStorage.getItem("mudae-theme");
+      if(saved === "light") document.documentElement.setAttribute("data-theme", "light");
+    }catch(e){}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Bricolage+Grotesque:wght@500;700;800&display=swap">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/hero.css">
+<link rel="stylesheet" href="css/carousel.css">
+</head>
+<body>
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="loader-mark"><span></span><span></span><span></span></div>
+</div>
+
+<div class="bg-fx" aria-hidden="true">
+  <div class="bg-blob bg-blob-1"></div>
+  <div class="bg-blob bg-blob-2"></div>
+  <div class="bg-blob bg-blob-3"></div>
+  <div class="bg-blob bg-blob-4"></div>
+</div>
+
+<header class="hero" id="hero">
+  <div class="hero-strips" id="heroStrips" aria-hidden="true"></div>
+  <div class="hero-spotlight" id="heroSpotlight" aria-hidden="true"></div>
+  <div class="hero-inner">
+    <span class="hero-badge"><span class="dot"></span>Assistant Mudae non-officiel</span>
+    <h1 class="hero-title">
+      <span class="word">Mudae</span><span class="word accent">Toolbox</span>
+      <span class="hero-reflection" aria-hidden="true">Mudae Toolbox</span>
+    </h1>
+    <div class="hero-cta">
+      <a class="hero-btn hero-btn-primary" href="#tabs">Découvrir les outils ↓</a>
+    </div>
+  </div>
+  <div class="hero-scroll"><span>Défiler</span><span class="chev"></span></div>
+</header>
+
+<div class="app">
+  <div class="topbar">
+    <div class="topbar-row">
+      <div class="brand"><span class="brand-mark"></span>Mudae Toolbox</div>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Basculer en mode jour">
+        <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+        <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12H5M19 12h2.5M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"/></svg>
+      </button>
+    </div>
+    <nav class="carousel" id="tabs" aria-label="Navigation principale">
+      <div class="carousel-row">
+        <button class="carousel-arrow" id="carouselPrev" type="button" aria-label="Précédent">‹</button>
+        <div class="carousel-stage">
+          <div class="carousel-track" id="carouselTrack">
+            <button class="tab-btn carousel-card active" data-tab="sprites">
+              <svg class="carousel-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><circle cx="12" cy="12" r="2.3" fill="currentColor" stroke="none"/></svg>
+              <span class="carousel-card-label">Sprites Pokémon</span>
+            </button>
+            <button class="tab-btn carousel-card" data-tab="cropper">
+              <svg class="carousel-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>
+              <span class="carousel-card-label">Cropper</span>
+            </button>
+            <button class="tab-btn carousel-card" data-tab="solvers">
+              <svg class="carousel-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              <span class="carousel-card-label">Solvers</span>
+            </button>
+            <button class="tab-btn carousel-card" data-tab="wish">
+              <svg class="carousel-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.9-4.8 4.6 1.2 6.6L12 17.6l-5.9 3.1 1.2-6.6L2.5 9.5l6.6-.9L12 2.5z"/></svg>
+              <span class="carousel-card-label">Wish Formator</span>
+            </button>
+            <button class="tab-btn carousel-card" data-tab="boost">
+              <svg class="carousel-card-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>
+              <span class="carousel-card-label">Boostwish</span>
+            </button>
+            <button class="tab-btn carousel-card" data-tab="haremsort">
+              <svg class="carousel-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 2 8l10 6 10-6-10-6z"/><path d="M2 14l10 6 10-6"/></svg>
+              <span class="carousel-card-label">Tri Harem ($sm)</span>
+            </button>
+            <button class="tab-btn carousel-card" data-tab="colors">
+              <svg class="carousel-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="9" cy="9" r="6"/><circle cx="15" cy="9" r="6"/><circle cx="12" cy="15" r="6"/></svg>
+              <span class="carousel-card-label">Couleurs</span>
+            </button>
+            <button class="tab-btn carousel-card" data-tab="stats">
+              <svg class="carousel-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="20" x2="5" y2="12"/><line x1="12" y1="20" x2="12" y2="6"/><line x1="19" y1="20" x2="19" y2="15"/></svg>
+              <span class="carousel-card-label">Mes stats</span>
+            </button>
+          </div>
+        </div>
+        <button class="carousel-arrow" id="carouselNext" type="button" aria-label="Suivant">›</button>
+      </div>
+      <div class="carousel-caption" id="carouselCaption"></div>
+    </nav>
+  </div>
+
+  <main>
+
+    <section id="panel-sprites" class="panel active">
+      <h1>Générateur de sprites Pokémon</h1>
+      <p class="subtitle">Sprites Black &amp; White complets, 35 décors, 40 socles — 100% local.</p>
+
+      <div class="grid-2">
+        <div>
+          <div class="card">
+            <h2><span class="num">1</span>Choisir le Pokémon</h2>
+            <label>Variante du sprite</label>
+            <select id="pokeVariant">
+              <option value="front" selected>Face (normal)</option>
+              <option value="shiny">Face (shiny)</option>
+              <option value="back">Dos</option>
+              <option value="female">Femelle</option>
+            </select>
+            <label>Rechercher par nom ou par numéro</label>
+            <input type="text" id="pokeSearch" placeholder="pikachu, dracaufeu, 25...">
+            <div class="poke-results" id="pokeResults">
+              <div class="skeleton-poke"><div class="skeleton skeleton-thumb"></div><div class="skeleton skeleton-line"></div></div>
+              <div class="skeleton-poke"><div class="skeleton skeleton-thumb"></div><div class="skeleton skeleton-line"></div></div>
+              <div class="skeleton-poke"><div class="skeleton skeleton-thumb"></div><div class="skeleton skeleton-line"></div></div>
+              <div class="skeleton-poke"><div class="skeleton skeleton-thumb"></div><div class="skeleton skeleton-line"></div></div>
+              <div class="skeleton-poke"><div class="skeleton skeleton-thumb"></div><div class="skeleton skeleton-line"></div></div>
+              <div class="skeleton-poke"><div class="skeleton skeleton-thumb"></div><div class="skeleton skeleton-line"></div></div>
+            </div>
+            <div class="btn-row">
+              <button class="small-btn" id="pokeImportBtn">Importer mes sprites</button>
+              <input type="file" id="pokeImportFile" accept="image/*" multiple style="display:none;">
+            </div>
+            <div class="status" id="pokeStatus"></div>
+          </div>
+
+          <div class="card">
+            <h2><span class="num">2</span>Arrière-plan</h2>
+            <div class="asset-grid" id="bgGrid"></div>
+            <div class="btn-row">
+              <button class="small-btn" id="clearBgBtn">Aucun</button>
+              <button class="small-btn" id="customBgBtn">Importer le mien</button>
+              <input type="file" id="customBgFile" accept="image/*" style="display:none;">
+            </div>
+          </div>
+
+          <div class="card">
+            <h2><span class="num">3</span>Socle</h2>
+            <div class="asset-grid" id="socleGrid"></div>
+            <div class="btn-row">
+              <button class="small-btn" id="clearSocleBtn">Aucun</button>
+              <button class="small-btn" id="customSocleBtn">Importer le mien</button>
+              <input type="file" id="customSocleFile" accept="image/*" style="display:none;">
+            </div>
+            <label>Largeur du socle (<span id="socleScaleValue">55</span>%)</label>
+            <input type="range" id="socleScale" min="20" max="140" value="55">
+            <label>Hauteur du socle sur l'image (<span id="socleYValue">78</span>%)</label>
+            <input type="range" id="socleY" min="0" max="100" value="78">
+          </div>
+
+          <div class="card">
+            <h2><span class="num">4</span>Réglages du Pokémon</h2>
+            <label>Taille (<span id="scaleValue">300</span>%)</label>
+            <input type="range" id="pokeScale" min="50" max="900" value="300">
+            <div class="btn-row">
+              <button id="flipBtn">Retourner</button>
+              <button id="resetPosBtn">Recentrer sur le socle</button>
+            </div>
+            <p class="hint">Glisse le Pokémon sur le canvas pour le positionner.</p>
+          </div>
+
+          <div class="card">
+            <h2><span class="num">5</span>Export</h2>
+            <div class="radio-row">
+              <label><input type="checkbox" id="useBorder" checked> Cadre Mudae sur l'export 225x350</label>
+            </div>
+            <div class="radio-row">
+              <label><input type="checkbox" id="previewBorder"> Prévisualiser le cadre sur le canvas</label>
+            </div>
+            <label>Remplacer le cadre inclus (optionnel)</label>
+            <input type="file" id="borderFile" accept="image/*">
+            <div class="btn-row">
+              <button id="exportFullBtn">Télécharger l'image complète</button>
+              <button class="btn-primary" id="exportMudaeBtn">Exporter en 225x350</button>
+            </div>
+            <div class="status" id="exportStatus"></div>
+          </div>
+        </div>
+
+        <div>
+          <div style="position:sticky;top:120px;">
+            <div class="canvas-wrap">
+              <canvas id="spriteCanvas" width="450" height="700"></canvas>
+            </div>
+            <p class="hint" style="text-align:center;">Canvas au ratio Mudae 225x350 : ce que tu vois est ce que tu exportes.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-cropper" class="panel">
+      <h1>Image Cropper Mudae</h1>
+      <p class="subtitle">PNG, JPG et GIF animés. Le cadre Mudae s'applique automatiquement.</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <h2>Source</h2>
+          <label>Fichier local (image ou GIF)</label>
+          <input type="file" id="cropFile" accept="image/*,.gif">
+          <label>Ou depuis une URL</label>
+          <input type="url" id="cropUrl" placeholder="https://...">
+          <div class="btn-row">
+            <button id="loadCropUrlBtn">Charger depuis l'URL</button>
+          </div>
+          <div class="status" id="cropStatus"></div>
+
+          <div class="gif-bar" id="cropGifInfo" style="display:none;">
+            <button class="small-btn" id="cropPrevFrame">◀</button>
+            <button class="small-btn" id="cropPlayBtn">Pause</button>
+            <button class="small-btn" id="cropNextFrame">▶</button>
+            <span class="idx" id="cropFrameIndex"></span>
+            <span class="count" id="cropGifCount"></span>
+          </div>
+
+          <label>Zoom (<span id="cropZoomValue">100</span>%)</label>
+          <input type="range" id="cropZoom" min="5" max="800" value="100">
+
+          <div class="radio-row">
+            <label><input type="checkbox" id="cropUseFrame" checked> Appliquer le cadre Mudae</label>
+          </div>
+
+          <label>Couleur de fond</label>
+          <div class="radio-row">
+            <label><input type="radio" name="cropBg" value="transparent" checked> Transparent</label>
+            <label><input type="radio" name="cropBg" value="#000000"> Noir</label>
+            <label><input type="radio" name="cropBg" value="#ffffff"> Blanc</label>
+            <label><input type="radio" name="cropBg" value="#2b2d31"> Discord</label>
+          </div>
+
+          <div class="btn-row">
+            <button class="small-btn" id="cropFitBtn">Tout voir</button>
+            <button class="small-btn" id="cropFillBtn">Remplir le cadre</button>
+            <button class="small-btn" id="cropCenterBtn">Recentrer</button>
+          </div>
+          <div class="btn-row">
+            <button class="btn-primary" id="cropExportBtn">Exporter 225x350</button>
+          </div>
+
+          <div class="info-box">
+            <b>Contrôles</b>
+            <ul class="tips">
+              <li><b>Clic maintenu + glisser</b> — déplacer l'image</li>
+              <li><b>Molette</b> — zoomer sur le point survolé</li>
+              <li><b>Flèches du clavier</b> — ajuster au pixel (Maj = 10x plus vite)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="display:flex;align-items:center;justify-content:center;">
+            <div class="canvas-wrap" style="padding:0;">
+              <canvas id="cropCanvas" class="cropper-view" width="225" height="350"></canvas>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Envoi sur Imgur</h2>
+            <p class="hint">Un clic suffit :</p>
+            <ul class="tips">
+              <li>prépare l'image au format Mudae</li>
+              <li>la télécharge et la copie dans le presse-papiers</li>
+              <li>ouvre la page d'upload Imgur dans un nouvel onglet</li>
+            </ul>
+            <div class="btn-row">
+              <button class="btn-primary" id="cropImgurBtn">Envoyer sur Imgur</button>
+            </div>
+            <div class="status" id="cropImgurStatus"></div>
+            <div class="info-box">
+              <b>Sur l'onglet Imgur :</b> <b>Ctrl+V</b> pour coller l'image, ou glisse le fichier téléchargé.<br><br>
+              Presse-papiers = PNG uniquement (limite des navigateurs). Pour un GIF, glisse-dépose le fichier téléchargé.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-solvers" class="panel">
+      <h1>Solvers Ourosphères</h1>
+      <p class="subtitle">Logique vérifiée contre les solveurs de référence de la communauté.</p>
+
+      <div class="solver-tabs" id="solverTabs">
+        <button class="tab-btn solver-tab active" data-solver="oq">$oq (Quest)</button>
+        <button class="tab-btn solver-tab" data-solver="oc">$oc (Chest)</button>
+        <button class="tab-btn solver-tab" data-solver="ot">$ot (Trace)</button>
+      </div>
+
+      <div id="solver-oq" class="solver-panel">
+        <div class="card">
+          <h2>Règles de $ouroquest</h2>
+          <p>Grille 5×5, 4 sphères violettes cachées. La couleur d'une case revèle le nombre de violettes parmi ses 8 voisines :</p>
+          <ul class="tips">
+            <li><b>Bleu</b> — 0 violette adjacente</li>
+            <li><b>Sarcelle</b> — 1</li>
+            <li><b>Vert</b> — 2</li>
+            <li><b>Jaune</b> — 3</li>
+            <li><b>Orange</b> — 4 et plus</li>
+          </ul>
+          <p class="hint">Cliquer une violette est gratuit. Les 3 premières comptent comme objectif ; la 4e devient une sphère rouge (150 pts) et coûte un essai. 7 essais au total.</p>
+          <p class="hint">Sans indice : 12650 configurations possibles — exactement la valeur du solveur de référence au démarrage.</p>
+        </div>
+        <div class="card">
+          <h2>Grille</h2>
+          <p class="hint">Clic gauche : couleur suivante (vide → bleu → sarcelle → vert → jaune → orange → violet). Clic droit : couleur précédente. Le pourcentage affiché est la probabilité que la case soit violette.</p>
+          <div class="oq-grid" id="oqGrid"></div>
+          <div class="btn-row"><button class="small-btn" id="oqResetBtn">Réinitialiser</button></div>
+          <div class="solver-result" id="oqResult"></div>
+        </div>
+      </div>
+
+      <div id="solver-oc" class="solver-panel" style="display:none;">
+        <div class="card">
+          <h2>Règles de $ourochest</h2>
+          <p>Une seule sphère rouge cachée, 5 clics. La couleur d'une case indique sa position relative à la rouge :</p>
+          <ul class="tips">
+            <li><b>Rouge</b> : c'est la case cherchée</li>
+            <li><b>Orange</b> : adjacente en ligne ou colonne</li>
+            <li><b>Jaune</b> : adjacente en diagonale</li>
+            <li><b>Vert</b> : même ligne ou colonne, plus loin</li>
+            <li><b>Sarcelle</b> : même diagonale, plus loin</li>
+            <li><b>Bleu</b> : aucune de ces relations</li>
+          </ul>
+          <p class="hint">Cet ordre correspond exactement à la séquence de clic des solveurs de référence (bleu → sarcelle → vert → jaune → orange → rouge), qui va du plus éloigné au plus proche.</p>
+          <div class="warn-box">
+            Les solveurs de référence comptent <b>24 positions possibles</b>, pas 25 : les 25 signatures de couleur sont bien distinctes, une case n'est donc jamais occupée par la rouge. Le centre est le candidat le plus probable, sans confirmation officielle. Décoche la case ci-dessous si tu observes en jeu que le centre est possible.
+          </div>
+        </div>
+        <div class="card">
+          <h2>Grille</h2>
+          <div class="radio-row">
+            <label><input type="checkbox" id="ocExcludeCenter" checked> Exclure la case centrale (24 positions, comme les solveurs de référence)</label>
+          </div>
+          <p class="hint">Clic gauche : couleur suivante. Clic droit : précédente. Le pourcentage est la probabilité que la case soit rouge.</p>
+          <div class="oq-grid" id="ocGrid"></div>
+          <div class="btn-row"><button class="small-btn" id="ocResetBtn">Réinitialiser</button></div>
+          <div class="solver-result" id="ocResult"></div>
+        </div>
+      </div>
+
+      <div id="solver-ot" class="solver-panel" style="display:none;">
+        <div class="card">
+          <h2>Règles de $ourotrace</h2>
+          <p>Retrouve toutes les cases colorées, regroupées en séries contiguës. La couleur indique la longueur de la série :</p>
+          <ul class="tips">
+            <li><b>Sarcelle</b> — série de 4</li>
+            <li><b>Vert</b> — série de 3</li>
+            <li><b>Jaune</b> — série de 3</li>
+            <li><b>Couleurs rares</b> — série de 2</li>
+          </ul>
+          <p class="hint">Seules les cases <b>bleues</b> coûtent un clic (4 disponibles). Règle de grâce jusqu'à 5 cases colorées trouvées.</p>
+          <div class="warn-box">
+            Tableau de suivi uniquement : la position exacte des séries n'est pas calculée, la distribution des sphères n'étant pas documentée.
+          </div>
+        </div>
+        <div class="card">
+          <h2>Grille de suivi</h2>
+          <label>Clics bleus disponibles</label>
+          <input type="number" id="otBudget" min="1" value="4" style="max-width:120px;">
+          <p class="hint">Clic gauche : vide → bleu → sarcelle (4) → vert (3) → jaune (3) → rare (2).</p>
+          <div class="oq-grid" id="otGrid" style="margin-top:12px;"></div>
+          <div class="btn-row"><button class="small-btn" id="otResetBtn">Réinitialiser</button></div>
+          <div class="solver-result" id="otResult"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-wish" class="panel">
+      <h1>Wish Formator</h1>
+      <p class="subtitle">Le préfixe $ est intégré : tape juste les noms. Organise, tague, génère.</p>
+
+      <div class="card">
+        <h2><span class="num">1</span>Importer la wishlist</h2>
+        <label>Colle ta wishlist, bonus compris — idéalement un personnage par ligne</label>
+        <textarea id="wishInput" placeholder="Reze  +45% C.C.  +45% Asa Mitaka  +45% Lelouch  +105% Zero Two  Lab Member No. 004  +105% Yoru  Levi +30% Garfield"></textarea>
+        <div class="radio-row">
+          <label><input type="checkbox" id="wishDedupe" checked> Supprimer les doublons</label>
+          <label><input type="checkbox" id="wishCircular" checked> Wishlist circulaire (le dernier touche le premier)</label>
+        </div>
+        <div class="btn-row">
+          <button class="btn-primary" id="wishBuildBtn">Importer et déduire les perks</button>
+        </div>
+        <div class="status" id="wishStatus"></div>
+        <div class="info-box">
+          <b>Reçu → donné.</b> Le % affiché est ce que chaque personnage reçoit de ses voisins ; l'appli en déduit son niveau de perk et le garde attaché quand tu réorganises.<br><br>
+          <b>Un nom par ligne.</b> Sur une seule ligne, impossible de savoir où un nom s'arrête (ex. « Zero Two Lab Member No. 004 »). Le parseur se rabat sur les doubles espaces et t'avertit si besoin.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Ajout rapide</h2>
+        <div class="quick-add-row">
+          <input type="text" id="wishQuickInput" placeholder="Reze$Asa Mitaka$Lelouch" aria-label="Noms séparés par $">
+          <button class="small-btn" id="wishQuickAddBtn" type="button">Ajouter</button>
+        </div>
+        <p class="hint">Tag auto si présent dans le nom : ⭐ star · ✅ acquis · 🔐 lock.</p>
+      </div>
+
+      <div id="wishWorkspace" style="display:none;">
+        <div class="card">
+          <h2><span class="num">2</span>Organiser et taguer</h2>
+          <p class="hint">Glisse pour réordonner (recalcul en direct). Clique une carte pour son statut et son niveau de perk.</p>
+          <div class="btn-row">
+            <button class="small-btn" id="wishAllWish">Tout en souhait</button>
+            <button class="small-btn" id="wishAllLock">Tout verrouiller</button>
+            <button class="small-btn" id="wishAllStar">Tout en star</button>
+            <button class="small-btn" id="wishReverse">Inverser</button>
+            <button class="small-btn" id="wishGroupCarriers">Répartir les porteurs</button>
+          </div>
+          <label>Limite de slots de wishlist (0 = pas de limite)</label>
+          <input type="number" id="wishSlotLimit" min="0" value="0" style="max-width:160px;">
+          <p class="hint" id="wishCount"></p>
+          <div class="search-field" style="margin-bottom:var(--s-3);">
+            <input type="text" id="wishFilter" placeholder="Filtrer la liste..." aria-label="Filtrer les personnages">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path>
+            </svg>
+          </div>
+          <div class="wish-list" id="wishList" aria-live="polite"></div>
+        </div>
+
+        <div class="card">
+          <h2><span class="num">3</span>Bilan des bonus d'adjacence</h2>
+          <div class="stat-grid" id="wishAdjSummary"></div>
+          <div class="info-box">
+            <b>Le total ne bouge pas.</b> Chaque porteur donne son bonus à ses 2 voisins : la somme distribuée = 2× la somme des perks, quel que soit l'ordre. Réorganiser ne crée pas de bonus, ça décide <b>qui</b> le reçoit — place tes porteurs autour des personnages que tu veux vraiment voir spawn.
+          </div>
+        </div>
+
+        <div class="card">
+          <h2><span class="num">4</span>Générer le script</h2>
+          <label>Commande à utiliser pour le tag « Lock »</label>
+          <select id="lockCommand">
+            <option value="wishl" selected>$wishl (commande réelle, protège de $wishpurge)</option>
+            <option value="wishlock">$wishlock (comme demandé, non documentée)</option>
+          </select>
+          <div class="warn-box">
+            <b>$wishlock n'est pas une commande Mudae documentée</b> (absente du wiki officiel). La commande réelle qui protège de <code>$wishpurge</code> est <code>$wishl</code> — teste <code>$wishlock</code> en jeu avant de t'y fier.
+          </div>
+          <div class="btn-row">
+            <button class="btn-primary" id="wishGenerateBtn">Générer les commandes</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="wishScriptCard" style="display:none;">
+        <h2>Bloc de commandes</h2>
+        <div class="output-box" id="wishScript"></div>
+        <div class="btn-row">
+          <button class="small-btn" id="wishScriptCopyBtn">Tout copier</button>
+          <button class="small-btn" id="wishScriptCopyCleanBtn">Copier sans les commentaires</button>
+        </div>
+        <div class="info-box">
+          Le <code>$wishi</code> reproduit ton ordre exact en une seule commande. Envoie d'abord les ajouts, puis ce <code>$wishi</code>. Les lignes <code>#</code> sont des repères pour toi ; le second bouton les retire automatiquement.
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-boost" class="panel">
+      <h1>Boostwish Calculator</h1>
+      <p class="subtitle">Taux d'apparition réel puis investissement $bw optimal.</p>
+
+      <div class="card">
+        <h2>Comment fonctionne $boostwish</h2>
+        <p>$boostwish ($bw) échange des rolls bonus permanents contre un multiplicateur de spawn sur ta wishlist. Rendement dégressif par roll investi :</p>
+        <ul class="tips">
+          <li><b>+20%</b> — les 5 premiers rolls</li>
+          <li><b>+15%</b> — jusqu'à 15</li>
+          <li><b>+10%</b> — jusqu'à 100</li>
+          <li><b>+5%</b> — jusqu'à 200</li>
+          <li><b>+1%</b> — au-delà</li>
+        </ul>
+        <p class="hint">Bonus $starwish inclus : +10% par roll (+5% après 100, +1% après 200).</p>
+        <p>Compromis : les rolls investis ne sont plus lancés. L'optimum = <b>rolls restants × multiplicateur</b>, maximisé.</p>
+        <div class="warn-box">Les rolls empilés ($us) ne sont pas boostés, et seuls les rolls bonus issus des upgrades sont investissables. Le cooldown pour redescendre est de 12 heures.</div>
+      </div>
+
+      <div class="card">
+        <h2><span class="num">1</span>Taux d'apparition d'un wish</h2>
+        <p class="hint">Valeurs à récupérer avec $wltu, $bonus, $dld et $persr.</p>
+        <div class="grid-2">
+          <div>
+            <label>Wishes dans ton type de roll ($wltu)</label>
+            <input type="number" id="srWishes" min="0" value="100">
+          </div>
+          <div>
+            <label>Boost wishlist badges en % ($bonus)</label>
+            <input type="number" id="srBadgeBoost" min="0" value="150">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <label>Boost première wish en % ($fw)</label>
+            <input type="number" id="srFirstBoost" min="0" value="0">
+          </div>
+          <div>
+            <label>Personnages désactivés ($dld)</label>
+            <input type="number" id="srDisabled" min="0" value="0">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <label>Personnages non claim du pool</label>
+            <input type="number" id="srUnclaimed" min="0" value="1000">
+          </div>
+          <div>
+            <label>Taille totale du pool</label>
+            <input type="number" id="srTotal" min="1" value="2000">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <label>Personal rare ($persr)</label>
+            <input type="number" id="srPersonalRare" min="0" step="0.1" value="1">
+          </div>
+          <div>
+            <label>Rolls disponibles</label>
+            <input type="number" id="srRolls" min="1" value="68">
+          </div>
+        </div>
+        <label>Nombre de wishes souhaités</label>
+        <input type="number" id="srWanted" min="1" value="1" style="max-width:160px;">
+        <div class="btn-row">
+          <button class="btn-primary" id="srCalcBtn">Calculer le taux</button>
+        </div>
+        <div class="stat-grid" id="srResult" style="margin-top:12px;"></div>
+        <div class="warn-box">Formule reprise du Wish Spawnrate Calculator de Svessinn (calculs de davidebic). Approximations : de grosses disable lists et un personal rare de 3 ou plus donnent des résultats peu fiables.</div>
+      </div>
+
+      <div class="card">
+        <h2><span class="num">2</span>Investissement optimal</h2>
+        <div class="grid-2">
+          <div>
+            <label>Rolls par heure au total</label>
+            <input type="number" id="bwTotalRolls" min="1" value="68">
+          </div>
+          <div>
+            <label>Rolls bonus investissables</label>
+            <input type="number" id="bwInvestable" min="0" value="60">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <label>Bonus wishlist déjà acquis (%)</label>
+            <input type="number" id="bwBaseBonus" min="0" value="150">
+          </div>
+          <div>
+            <label>Rolls déjà investis dans $bw</label>
+            <input type="number" id="bwCurrent" min="0" value="0">
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn-primary" id="bwCalcBtn">Calculer l'optimum</button>
+        </div>
+      </div>
+
+      <div class="card" id="bwResultCard" style="display:none;">
+        <h2>Résultat</h2>
+        <div class="stat-grid" id="bwStats"></div>
+        <div class="output-box" id="bwCommand" style="margin-top:12px;"></div>
+        <div class="btn-row"><button class="small-btn" id="bwCopyBtn">Copier la commande</button></div>
+        <h2 style="margin-top:20px;">Rendement selon l'investissement</h2>
+        <p class="hint">Wishes attendus par heure en valeur relative. La barre orange est l'optimum.</p>
+        <div class="bar-chart" id="bwChart"></div>
+      </div>
+    </section>
+
+    <section id="panel-haremsort" class="panel">
+      <h1>Tri du Harem ($sm)</h1>
+      <p class="subtitle">Séries et personnages dans un seul trieur, mélangés dans l'ordre que tu veux.</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <h2>Importer des personnages ($mm)</h2>
+          <label>Un personnage par ligne</label>
+          <textarea id="sortCharInput" placeholder="Garfield
+Bugs Bunny
+Lab Member No. 004"></textarea>
+          <div class="btn-row">
+            <button class="btn-primary" id="sortCharParse">Ajouter au trieur</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Importer des séries ($mmb)</h2>
+          <label>Une série par ligne, format « Nom - possédés/total »</label>
+          <textarea id="sortSeriesInput" placeholder="Attack on Titan - 9/94
+Bambi - 1/9"></textarea>
+          <div class="btn-row">
+            <button class="btn-primary" id="sortSeriesParse">Ajouter au trieur</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Trieur unifié</h2>
+        <div class="radio-row">
+          <label><input type="checkbox" id="sortReplace"> Remplacer les entrées du même type à l'import</label>
+        </div>
+        <div class="btn-row">
+          <button class="small-btn" id="sortAbc">Trier A-Z</button>
+          <button class="small-btn" id="sortReverseList">Inverser</button>
+          <button class="small-btn" id="sortGroupKind">Séries puis persos</button>
+          <button class="small-btn" id="sortByCompletion">Par complétion</button>
+          <button class="small-btn" id="sortClear">Vider</button>
+        </div>
+        <div class="status" id="sortStatus"></div>
+        <p class="hint" id="sortCount"></p>
+        <p class="hint">Glisse-dépose pour mélanger librement séries et personnages. La couleur de la bordure distingue les deux : violet pour les personnages, sarcelle pour les séries.</p>
+        <div class="wish-list" id="sortList"></div>
+      </div>
+
+      <div class="card">
+        <h2>Génération des commandes</h2>
+
+        <label>Type de tri</label>
+        <select id="sortMode">
+          <option value="order" selected>Ordre du trieur ci-dessus</option>
+          <option value="note">Par note — $sm note</option>
+          <option value="flag">Par tag / flag — $sm$mmw re:zero</option>
+          <option value="abc">Alphabétique — $sm abc</option>
+          <option value="reverse">Inversé — $sm reverse</option>
+        </select>
+
+        <div id="sortFlagWrap" style="display:none;">
+          <label>Flag complet (sans le $ initial)</label>
+          <input type="text" id="sortFlag" placeholder="mmw re:zero">
+          <p class="hint">Exemples : <code>mmw re:zero</code> donne <code>$sm$mmw re:zero</code>, <code>fnw note</code> donne <code>$sm$fnw note</code>.</p>
+        </div>
+
+        <div id="sortAnchorWrap">
+          <div class="radio-row">
+            <label><input type="checkbox" id="sortAnchored"> Insérer après un point de référence ($smp)</label>
+          </div>
+          <input type="text" id="sortAnchor" placeholder="Personnage ou série servant de repère">
+        </div>
+
+        <div id="sortChunkWrap">
+          <label>Entrées par commande</label>
+          <input type="number" id="sortChunk" min="1" value="20" style="max-width:140px;">
+        </div>
+
+        <label>Commandes générées</label>
+        <div class="output-box" id="sortOutput"></div>
+        <div class="btn-row">
+          <button class="small-btn" id="sortCopyBtn">Tout copier</button>
+          <button class="small-btn" id="sortCopyCleanBtn">Copier sans les commentaires</button>
+        </div>
+
+        <div class="info-box">
+          <b>Ordre inverse, volontairement.</b> <code>$sm</code> remonte les entrées citées en tête du harem — colle les lignes générées de haut en bas sans réfléchir, l'ordre est déjà calculé pour ça.<br><br>
+          <b>Séries et personnages restent séparés.</b> Chaque suite d'un même type devient sa propre commande. En mode <code>$smp</code>, chaque bloc s'accroche au dernier élément du précédent pour préserver l'ordre.
+        </div>
+
+        <div class="warn-box">
+          Le tri chronologique n'est volontairement pas proposé : aucun mode de cette interface ne le génère.
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-colors" class="panel">
+      <h1>Couleurs</h1>
+      <p class="subtitle">Choisis une couleur par personnage, le bloc de commandes se met à jour tout seul.</p>
+
+      <div class="card">
+        <h2><span class="num">1</span>Coller la liste</h2>
+        <label>Sortie de $mmysi-c- ou simple liste de noms</label>
+        <textarea id="colorInput" placeholder="Harem de nathangdit
+Asa Mitaka ·   (2) - https://imgur.com/Nsf9CKZ.png
+Kiki ·   (1) - https://mudae.net/uploads/8461491/BbQaFi0~mIGi658.png"></textarea>
+        <div class="btn-row">
+          <button class="btn-primary" id="colorParseBtn">Analyser</button>
+        </div>
+        <div class="status" id="colorStatus"></div>
+      </div>
+
+      <div id="colorWorkspace" style="display:none;">
+        <div class="card">
+          <h2><span class="num">2</span>Attribuer les couleurs</h2>
+          <p class="hint">Sélecteur natif, palette rapide, ou extraction depuis l'image. Chaque changement met à jour les commandes en bas.</p>
+          <div class="btn-row">
+            <input type="color" id="colorBulk" class="color-input" value="#B26BFF">
+            <button class="small-btn" id="colorApplyAll">Appliquer à tous</button>
+            <button class="small-btn" id="colorExtractAll">Extraire depuis les images</button>
+            <button class="small-btn" id="colorClearAll">Tout effacer</button>
+          </div>
+          <div class="harem-list" id="colorList"></div>
+        </div>
+
+        <div class="card">
+          <h2><span class="num">3</span>Commandes</h2>
+          <label>Modèle de commande</label>
+          <select id="colorCommand">
+            <option value="$embedcolor {nom}${hex}" selected>$embedcolor {nom}${hex}</option>
+            <option value="$ec {nom}${hex}">$ec {nom}${hex}</option>
+            <option value="$embedcolor {nom}${hexsans}">$embedcolor {nom}$ sans dièse</option>
+          </select>
+          <p class="hint" id="colorAssigned"></p>
+          <div class="output-box" id="colorOutput"></div>
+          <div class="btn-row">
+            <button class="small-btn" id="colorCopyBtn">Copier</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-stats" class="panel">
+      <h1>Mes statistiques</h1>
+      <p class="subtitle">Colle ta sortie $bonus pour que les autres onglets s'alignent sur tes vraies limites.</p>
+
+      <div class="card">
+        <h2><span class="num">1</span>Coller le bloc</h2>
+        <label>Sortie brute de $bonus (ou équivalent)</label>
+        <textarea id="statsInput" placeholder="Rolls par heure : +7
+Slots de $wishlist : +8
+Kakera loot : +12%"></textarea>
+        <div class="btn-row">
+          <button class="btn-primary" id="statsParseBtn">Analyser</button>
+          <button id="statsApplyBtn">Propager vers les autres onglets</button>
+        </div>
+        <div class="status" id="statsStatus"></div>
+      </div>
+
+      <div class="card">
+        <h2><span class="num">2</span>Valeurs extraites</h2>
+        <div class="stat-grid" id="statsResult"></div>
+        <div class="info-box">
+          <b>Ce que ces valeurs pilotent</b>
+          <ul class="tips">
+            <li><code>wishlistSlots</code> → limite affichée dans le Wish Formator (passe en rouge si dépassée)</li>
+            <li><code>rollsPerHour</code> → optimiseur $bw et taux d'apparition</li>
+            <li><code>wishlistBoost</code> / <code>firstWishBoost</code> → formule de spawn</li>
+            <li><code>bonusRolls</code> → maximum investissable dans $bw</li>
+          </ul>
+          <p class="hint">Le parseur garde aussi les autres lignes chiffrées rencontrées, même non utilisées pour l'instant.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="js/assets.js"></script>
+<script src="js/pokedata.js"></script>
+<script src="js/pokesprites.js"></script>
+<script src="js/gif.js"></script>
+<script src="js/adjacency.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/sprites.js"></script>
+<script src="js/cropper.js"></script>
+<script src="js/solvers.js"></script>
+<script src="js/wishformator.js"></script>
+<script src="js/boostwish.js"></script>
+<script src="js/haremsort.js"></script>
+<script src="js/colors.js"></script>
+<script src="js/playerstats.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+/* ============================================================
+   TOKENS — couche 1 : primitives et sémantique
+   Chargé avant style.css, surcharge les variables historiques.
+   ============================================================ */
+
+:root{
+
+  /* ---- Primitives : rampe neutre violette ---- */
+  --n-950:#0e0b14;
+  --n-900:#151120;
+  --n-850:#1b1628;
+  --n-800:#221c31;
+  --n-700:#2e2742;
+  --n-600:#7562a3;   /* bordure : 3.38:1 sur surface, 3.15:1 sur surface2 */
+  --n-500:#6d5f91;
+  --n-400:#9488b5;
+  --n-300:#b3a8ce;
+  --n-200:#d5cee6;
+  --n-100:#efeaf9;
+
+  /* ---- Primitives : accents ---- */
+  --a-purple:#b98cff;
+  --a-purple-deep:#7450e2;   /* blanc 5.27:1 */
+  --a-purple-mid:#9450e2;    /* blanc 4.66:1 */
+  --a-teal:#3fdcc6;
+  --a-orange:#ffa563;
+  --a-red:#ff6b80;
+  --a-green:#5cc46f;
+  --a-yellow:#f6d96b;
+  --a-blue:#6d9dff;
+  --a-pink:#ff7fd1;
+
+  /* ---- Sémantique : surfaces ---- */
+  --bg:var(--n-950);
+  --surface:var(--n-850);
+  --surface2:var(--n-800);
+  --surface3:var(--n-700);
+  --surface-raised:var(--n-800);
+
+  /* ---- Sémantique : bordures (contraste corrigé) ---- */
+  --border:var(--n-600);
+  --border-subtle:var(--n-700);
+  --border-strong:var(--n-500);
+
+  /* ---- Sémantique : texte ---- */
+  --text:var(--n-100);
+  --text-dim:var(--n-300);
+  --text-faint:var(--n-400);
+
+  /* ---- Sémantique : accents ---- */
+  --purple:var(--a-purple);
+  --teal:var(--a-teal);
+  --orange:var(--a-orange);
+  --red:var(--a-red);
+  --green:var(--a-green);
+  --yellow:var(--a-yellow);
+  --blue:var(--a-blue);
+  --pink:var(--a-pink);
+
+  /* ---- Échelle d'espacement : base 4px ---- */
+  --s-1:4px;
+  --s-2:8px;
+  --s-3:12px;
+  --s-4:16px;
+  --s-5:20px;
+  --s-6:24px;
+  --s-8:32px;
+  --s-10:40px;
+  --s-12:48px;
+  --s-16:64px;
+
+  /* ---- Échelle typographique modulaire ---- */
+  --t-xs:12px;
+  --t-sm:13px;
+  --t-base:15px;
+  --t-md:16px;
+  --t-lg:18px;
+  --t-xl:22px;
+  --t-2xl:28px;
+
+  --lh-tight:1.25;
+  --lh-normal:1.55;
+  --lh-relaxed:1.7;
+
+  --fw-normal:400;
+  --fw-medium:500;
+  --fw-semi:600;
+  --fw-bold:700;
+
+  --font-sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --font-display:"Bricolage Grotesque","Inter",-apple-system,sans-serif;
+
+  /* ---- Rayons ---- */
+  --r-sm:6px;
+  --r-md:10px;
+  --r-lg:14px;
+  --r-xl:18px;
+  --r-full:999px;
+  --radius:var(--r-lg);
+
+  /* ---- Élévation ---- */
+  --e-1:0 1px 2px rgba(0,0,0,.32);
+  --e-2:0 2px 8px rgba(0,0,0,.36);
+  --e-3:0 8px 24px rgba(0,0,0,.44);
+  --e-4:0 16px 48px rgba(0,0,0,.52);
+  --glow-purple:0 0 0 1px rgba(185,140,255,.34), 0 4px 20px rgba(139,92,246,.22);
+  --glow-teal:0 0 0 1px rgba(63,220,198,.34), 0 4px 20px rgba(63,220,198,.18);
+  --glow-mono:0 0 0 1px rgba(255,255,255,.32), 0 4px 22px rgba(255,255,255,.16);
+
+  /* ---- Mouvement ---- */
+  --d-instant:80ms;
+  --d-fast:140ms;
+  --d-base:220ms;
+  --d-slow:360ms;
+  --ease-out:cubic-bezier(.22,1,.36,1);
+  --ease-in-out:cubic-bezier(.65,0,.35,1);
+  --ease-spring:cubic-bezier(.34,1.56,.64,1);
+
+  /* ---- Cible tactile ---- */
+  --touch-min:44px;
+
+  /* ---- Focus ---- */
+  --focus-ring:0 0 0 2px var(--bg), 0 0 0 4px var(--fg);
+
+  /* ---- Thème : triplet RGB utilisé partout où le site pose du
+     blanc pur en dur (boutons ghost, reflets, halos). Un seul
+     changement ici les fait tous basculer en mode jour. ---- */
+  --fg:#fff;
+  --fg-rgb:255,255,255;
+  --bg-rgb:14,11,20;
+  --blob-blend:screen;
+
+  /* ---- Accents "encre" : mêmes teintes que --purple/--orange/etc.
+     en sombre (les pastels sont déjà lisibles sur fond quasi-noir).
+     À ne PAS utiliser pour les couleurs de grille des solvers, qui
+     doivent rester les vraies couleurs du jeu quel que soit le thème
+     — uniquement pour du texte/bordures d'accent lisibles. ---- */
+  --purple-ink:var(--purple);
+  --teal-ink:var(--teal);
+  --orange-ink:var(--orange);
+  --red-ink:var(--red);
+  --green-ink:var(--green);
+  --yellow-ink:var(--yellow);
+  --blue-ink:var(--blue);
+  --pink-ink:var(--pink);
+}
+
+:root[data-theme="light"]{
+  /* Les composants qui référencent directement les primitives
+     --n-900/--n-950 (dégradés de carte, avatars, bloc de commandes)
+     ont aussi besoin d'un équivalent clair, sinon leur dégradé va du
+     clair au sombre au lieu de rester dans la même famille. */
+  --n-900:#eae5f0;
+  --n-950:#e1dbeb;
+
+  --bg:#f4f2f7;
+  --surface:#ffffff;
+  --surface2:#f1eef6;
+  --surface3:#e6e1ee;
+  --surface-raised:#ffffff;
+
+  --border:#c9c1d9;
+  --border-subtle:#e2dcec;
+  --border-strong:#a99cc4;
+
+  --text:#181420;
+  --text-dim:#4d465c;
+  --text-faint:#665f79;
+
+  --fg:#0b0812;
+  --fg-rgb:11,8,18;
+  --bg-rgb:244,242,247;
+
+  --glow-mono:0 0 0 1px rgba(11,8,18,.16), 0 4px 22px rgba(11,8,18,.08);
+  --blob-blend:multiply;
+
+  /* Pastels foncés : les teintes d'origine (--purple, --orange...)
+     n'offrent pas assez de contraste en texte sur fond clair. */
+  --purple-ink:#7c3aed;
+  --teal-ink:#0a6b62;
+  --orange-ink:#a8500d;
+  --red-ink:#c31d3a;
+  --green-ink:#157a3c;
+  --yellow-ink:#8a6a10;
+  --blue-ink:#2251c9;
+  --pink-ink:#be1b71;
+}
+
+/* Coupe-circuit pendant le bascule de thème : voir initTheme() dans
+   js/app.js. Évite qu'une propriété transitionnée reste figée sur son
+   ancienne valeur quand elle dépend d'une variable CSS re-résolue par
+   [data-theme] plutôt que changée directement par la règle. */
+html.theme-switching,
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after{
+  transition:none !important;
+  animation-play-state:paused !important;
+}
+
+/* Respect de prefers-reduced-motion : priorité 7 du skill */
+@media (prefers-reduced-motion: reduce){
+  :root{
+    --d-instant:0ms;
+    --d-fast:0ms;
+    --d-base:0ms;
+    --d-slow:0ms;
+  }
+  *,*::before,*::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+    scroll-behavior:auto !important;
+  }
+}
