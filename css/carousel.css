@@ -97,7 +97,7 @@
   50%{background-position:35% 25%, 65% 75%, 0 0;}
 }
 
-/* Décalage de phase par outil pour que les 9 cartes respirent de
+/* Décalage de phase par outil pour que les cartes respirent de
    façon indépendante plutôt que toutes en même temps. */
 .carousel-card[data-tab="sprites"]{ animation-delay:0s; }
 .carousel-card[data-tab="cropper"]{ animation-delay:-1.6s; }
@@ -106,7 +106,6 @@
 .carousel-card[data-tab="boost"]{ animation-delay:-6.4s; }
 .carousel-card[data-tab="haremsort"]{ animation-delay:-8s; }
 .carousel-card[data-tab="colors"]{ animation-delay:-9.6s; }
-.carousel-card[data-tab="stats"]{ animation-delay:-11.2s; }
 
 .carousel-card.co-0{
   transform:translate(-50%,-50%) translateZ(0) rotateY(0deg) scale(1);

@@ -144,6 +144,39 @@ html{scroll-behavior:smooth;}
 }
 
 /* ---- Badge : simple liseré, sans couleur ---- */
+/* ---- Bouton "Mes stats" : coin haut-droit du hero. Ouvre la
+   popup de saisie $bonus (voir components.css pour .modal /
+   .modal-lg). ---- */
+.hero-stats-btn{
+  position:absolute;
+  top:var(--s-6);right:var(--s-6);
+  z-index:2;
+  display:inline-flex;align-items:center;gap:7px;
+  padding:8px 16px 8px 14px;
+  border-radius:var(--r-full);
+  background:rgba(var(--fg-rgb),.05);
+  border:1px solid rgba(var(--fg-rgb),.2);
+  color:var(--fg);
+  font-family:inherit;
+  font-size:12px;
+  font-weight:var(--fw-semi);
+  cursor:pointer;
+  min-height:auto;
+  animation:heroFadeUp .8s var(--ease-out) both;
+  transition:transform var(--d-fast) var(--ease-spring),
+             border-color var(--d-fast) var(--ease-out),
+             background var(--d-fast) var(--ease-out);
+}
+.hero-stats-btn svg{width:14px;height:14px;}
+.hero-stats-btn:hover{
+  transform:translateY(-2px);
+  border-color:rgba(var(--fg-rgb),.4);
+  background:rgba(var(--fg-rgb),.09);
+}
+@media (max-width:640px){
+  .hero-stats-btn{top:var(--s-4);right:var(--s-4);padding:7px 12px 7px 10px;font-size:11px;}
+}
+
 .hero-badge{
   display:inline-flex;align-items:center;gap:8px;
   padding:7px 16px;
@@ -155,7 +188,7 @@ html{scroll-behavior:smooth;}
   letter-spacing:.14em;
   text-transform:uppercase;
   color:rgba(var(--fg-rgb),.6);
-  animation:heroFadeUp .8s var(--ease-out) both;
+  animation:heroFadeUp .8s var(--ease-out) .05s both;
 }
 .hero-badge .dot{
   width:5px;height:5px;border-radius:50%;

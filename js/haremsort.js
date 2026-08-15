@@ -4,6 +4,13 @@ var HaremSort = (function(){
 
   var items = [];
   var dragIndex = null;
+  var store = Utils.createStore("mudae-haremsort");
+
+  function persist(){
+    var state = { items: items };
+    store.save(state);
+    store.checkpoint(state);
+  }
 
   function parseCharacters(text){
     return text.split(/\r?\n/)
@@ -133,11 +140,18 @@ var HaremSort = (function(){
       container.appendChild(row);
     });
 
+    if(!items.length){
+      Utils.emptyState(container, "sort", "Trieur vide",
+        "Importe des personnages ($mm) ou des séries ($mmb) juste au-dessus.");
+    }
+
     var chars = items.filter(function(i){ return i.kind === "character"; }).length;
     var sers = items.length - chars;
     $("sortCount").textContent = items.length
       ? items.length + " entrée(s) : " + chars + " personnage(s), " + sers + " série(s)"
       : "";
+
+    persist();
   }
 
   function runsOf(list){
@@ -150,15 +164,40 @@ var HaremSort = (function(){
     return runs;
   }
 
-  function chunk(names, size){
-    var out = [];
-    for(var i = 0; i < names.length; i += size) out.push(names.slice(i, i + size));
+  /* Discord refuse les messages de plus de 2000 caractères. Plutôt qu'un
+     découpage arbitraire à 20 entrées, on remplit chaque commande au
+     maximum : moins de commandes à envoyer pour la même liste. La marge
+     couvre le préfixe ($smp + mot-clé + point de référence) déjà compté,
+     plus quelques caractères de sécurité. */
+  var DISCORD_LIMIT = 2000;
+  var SAFETY = 20;
+
+  function chunk(names, size, prefixLen){
+    var out = [], cur = [];
+    var budget = DISCORD_LIMIT - SAFETY - (prefixLen || 0);
+    var curLen = 0;
+
+    names.forEach(function(name){
+      var cost = (cur.length ? 3 : 0) + name.length;   // " $ " puis le nom
+      var full = size > 0 && cur.length >= size;
+      if(cur.length && (full || curLen + cost > budget)){
+        out.push(cur);
+        cur = [];
+        curLen = 0;
+        cost = name.length;
+      }
+      cur.push(name);
+      curLen += cost;
+    });
+
+    if(cur.length) out.push(cur);
     return out;
   }
 
   function generate(){
     var mode = $("sortMode").value;
-    var perCommand = parseInt($("sortChunk").value, 10) || 20;
+    var rawChunk = parseInt($("sortChunk").value, 10);
+    var perCommand = isNaN(rawChunk) || rawChunk <= 0 ? 0 : rawChunk;   // 0 = remplir au maximum
     var anchored = $("sortAnchored").checked;
     var anchor = $("sortAnchor").value.trim();
     var lines = [];
@@ -176,8 +215,9 @@ var HaremSort = (function(){
       if(!noteNames.length){
         lines.push("# Liste vide.");
       } else {
-        chunk(noteNames, perCommand).forEach(function(group){
-          lines.push((anchored ? "$smp" : "$sm") + " note " + group.join(" $ "));
+        var notePrefix = (anchored ? "$smp" : "$sm") + " note ";
+        chunk(noteNames, perCommand, notePrefix.length).forEach(function(group){
+          lines.push(notePrefix + group.join(" $ "));
         });
       }
     } else {
@@ -191,7 +231,11 @@ var HaremSort = (function(){
           var previous = anchor;
           flat.forEach(function(run){
             var keyword = run.kind === "series" ? "series " : "";
-            chunk(run.names, perCommand).forEach(function(group){
+            // le point de référence change à chaque bloc : on réserve la
+            // place du plus long nom de la série pour rester sous la limite
+            var longest = run.names.reduce(function(a, n){ return Math.max(a, n.length); }, anchor.length);
+            var prefixLen = ("$smp " + keyword).length + longest + 3;
+            chunk(run.names, perCommand, prefixLen).forEach(function(group){
               lines.push("$smp " + keyword + previous + " $ " + group.join(" $ "));
               previous = group[group.length - 1];
             });
@@ -203,7 +247,8 @@ var HaremSort = (function(){
         lines.push("# donc le dernier bloc envoyé se retrouve au sommet.");
         runs.slice().reverse().forEach(function(run){
           var keyword = run.kind === "series" ? "series " : "";
-          chunk(run.names, perCommand).slice().reverse().forEach(function(group){
+          var prefixLen = ("$sm " + keyword).length;
+          chunk(run.names, perCommand, prefixLen).slice().reverse().forEach(function(group){
             lines.push("$sm " + keyword + group.join(" $ "));
           });
         });
@@ -222,6 +267,18 @@ var HaremSort = (function(){
   }
 
   function init(){
+    Utils.attachVersions("sortVersionsBtn", store, function(state){
+      items = state.items || [];
+      render();
+      generate();
+      Utils.setStatus($("sortStatus"), "Version restaurée (" + items.length + " entrée(s)).", "ok");
+    });
+
+    var saved = store.load();
+    if(saved && saved.items && saved.items.length){
+      items = saved.items;
+    }
+
     $("sortCharParse").addEventListener("click", function(){
       var parsed = parseCharacters($("sortCharInput").value);
       addItems(parsed, $("sortReplace").checked ? "character" : null);
@@ -293,6 +350,7 @@ var HaremSort = (function(){
     });
 
     updateModeUi();
+    render();
     generate();
   }
 

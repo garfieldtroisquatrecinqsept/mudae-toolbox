@@ -119,6 +119,27 @@ var Utils = (function(){
     return { h: h * 360, s: s, l: l };
   }
 
+  function hslToRgb(h, s, l){
+    h = ((h % 360) + 360) % 360;
+    s = Math.max(0, Math.min(1, s));
+    l = Math.max(0, Math.min(1, l));
+    var c = (1 - Math.abs(2 * l - 1)) * s;
+    var x = c * (1 - Math.abs((h / 60) % 2 - 1));
+    var m = l - c / 2;
+    var r, g, b;
+    if(h < 60){ r = c; g = x; b = 0; }
+    else if(h < 120){ r = x; g = c; b = 0; }
+    else if(h < 180){ r = 0; g = c; b = x; }
+    else if(h < 240){ r = 0; g = x; b = c; }
+    else if(h < 300){ r = x; g = 0; b = c; }
+    else { r = c; g = 0; b = x; }
+    return {
+      r: Math.round((r + m) * 255),
+      g: Math.round((g + m) * 255),
+      b: Math.round((b + m) * 255)
+    };
+  }
+
   function extractColors(img, maxColors){
     var w = Math.min(img.naturalWidth, 160);
     var h = Math.max(1, Math.round(w * img.naturalHeight / img.naturalWidth));
@@ -162,6 +183,113 @@ var Utils = (function(){
     return picked.slice(0, maxColors || 6);
   }
 
+  function createStore(key, opts){
+    opts = opts || {};
+    var maxHistory = opts.maxHistory || 8;
+    var minInterval = opts.minInterval != null ? opts.minInterval : 60000;
+    var histKey = key + ":history";
+
+    function safeGet(k){
+      try{ var raw = localStorage.getItem(k); return raw ? JSON.parse(raw) : null; }
+      catch(e){ return null; }
+    }
+    function safeSet(k, v){
+      try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){}
+    }
+
+    return {
+      save: function(state){ safeSet(key, state); },
+      load: function(){ return safeGet(key); },
+      checkpoint: function(state){
+        var hist = safeGet(histKey) || [];
+        if(hist[0] && Date.now() - hist[0].t < minInterval) return;
+        hist.unshift({ t: Date.now(), state: state });
+        if(hist.length > maxHistory) hist.length = maxHistory;
+        safeSet(histKey, hist);
+      },
+      history: function(){ return safeGet(histKey) || []; },
+      clear: function(){
+        try{ localStorage.removeItem(key); localStorage.removeItem(histKey); }catch(e){}
+      }
+    };
+  }
+
+  function timeAgo(ts){
+    var s = Math.max(0, Math.round((Date.now() - ts) / 1000));
+    if(s < 60) return "à l'instant";
+    var m = Math.round(s / 60);
+    if(m < 60) return "il y a " + m + " min";
+    var h = Math.round(m / 60);
+    if(h < 24) return "il y a " + h + " h";
+    return "il y a " + Math.round(h / 24) + " j";
+  }
+
+  /* Écran vide : une liste sans contenu affichait un conteneur
+     totalement blanc, sans indiquer quoi faire. */
+  function emptyState(container, icon, title, hint){
+    container.innerHTML =
+      '<div class="empty-state">' +
+        '<svg class="empty-icon" aria-hidden="true"><use href="#ico-' + icon + '"></use></svg>' +
+        '<p class="empty-title">' + title + '</p>' +
+        (hint ? '<p class="empty-hint">' + hint + '</p>' : '') +
+      '</div>';
+  }
+
+  function attachVersions(btnId, store, onRestore){
+    var btn = $(btnId);
+    if(!btn) return;
+    var menu = null;
+
+    function close(){
+      if(menu && menu.parentNode) menu.parentNode.removeChild(menu);
+      menu = null;
+      document.removeEventListener("click", onOutside);
+      document.removeEventListener("keydown", onKey);
+    }
+    function onOutside(e){
+      if(menu && !menu.contains(e.target) && e.target !== btn) close();
+    }
+    function onKey(e){ if(e.key === "Escape") close(); }
+
+    btn.addEventListener("click", function(e){
+      e.stopPropagation();
+      if(menu){ close(); return; }
+
+      var hist = store.history();
+      menu = document.createElement("div");
+      menu.className = "versions-menu";
+
+      if(!hist.length){
+        var empty = document.createElement("div");
+        empty.className = "versions-empty";
+        empty.textContent = "Aucune sauvegarde pour l'instant.";
+        menu.appendChild(empty);
+      } else {
+        hist.forEach(function(entry){
+          var item = document.createElement("button");
+          item.type = "button";
+          item.className = "versions-item";
+          item.textContent = timeAgo(entry.t);
+          item.addEventListener("click", function(){
+            onRestore(entry.state);
+            close();
+          });
+          menu.appendChild(item);
+        });
+      }
+
+      document.body.appendChild(menu);
+      var rect = btn.getBoundingClientRect();
+      menu.style.top = (rect.bottom + window.scrollY + 6) + "px";
+      menu.style.left = (rect.left + window.scrollX) + "px";
+
+      setTimeout(function(){
+        document.addEventListener("click", onOutside);
+        document.addEventListener("keydown", onKey);
+      }, 0);
+    });
+  }
+
   return {
     $: $,
     setStatus: setStatus,
@@ -176,6 +304,11 @@ var Utils = (function(){
     normalizeImageUrl: normalizeImageUrl,
     rgbToHex: rgbToHex,
     rgbToHsl: rgbToHsl,
-    extractColors: extractColors
+    hslToRgb: hslToRgb,
+    extractColors: extractColors,
+    createStore: createStore,
+    timeAgo: timeAgo,
+    emptyState: emptyState,
+    attachVersions: attachVersions
   };
 })();

@@ -2,6 +2,7 @@ var BoostWish = (function(){
 
   var $ = Utils.$;
 
+  /* Boost de spawn wishlist gagné par roll investi, rendement dégressif. */
   function wishBonus(n){
     if(n <= 0) return 0;
     var tiers = [[5, 20], [15, 15], [100, 10], [200, 5], [Infinity, 1]];
@@ -14,7 +15,8 @@ var BoostWish = (function(){
     return bonus;
   }
 
-  function starBonus(n){
+  /* Boost star wish (le personnage en tête de wishlist) gagné en parallèle. */
+  function starWishBonus(n){
     if(n <= 0) return 0;
     var tiers = [[100, 10], [200, 5], [Infinity, 1]];
     var bonus = 0, prev = 0;
@@ -26,6 +28,23 @@ var BoostWish = (function(){
     return bonus;
   }
 
+  /* Un nombre de wishes attendus est souvent bien en dessous de 1 :
+     un arrondi fixe à 2 décimales afficherait « 0.01 contre 0.01 »
+     et masquerait totalement l'écart qu'on cherche à comparer. */
+  function fmtWishes(x){
+    if(x >= 10) return x.toFixed(1);
+    if(x >= 1) return x.toFixed(2);
+    if(x > 0) return x.toPrecision(3);
+    return "0";
+  }
+
+  function everyNRolls(expected, rollsLeft){
+    if(expected <= 0) return "jamais à ce rythme";
+    var rolls = Math.round(rollsLeft / expected);
+    var hours = Math.round(1 / expected);
+    return "≈ 1 wish tous les " + rolls + " rolls (" + hours + " h)";
+  }
+
   function statCard(label, value, hint){
     return "<div class='stat-card'>" +
       "<div class='sc-label'>" + label + "</div>" +
@@ -33,101 +52,160 @@ var BoostWish = (function(){
       "<div class='sc-hint'>" + hint + "</div></div>";
   }
 
-  function spawnRate(wl, wbBadge, wbFirst, disabled, unclaimed, total, personalRare){
+  /* Probabilité qu'un roll donné soit un wish. Le boost star wish entre
+     comme terme additif (il ne concerne qu'un personnage), le boost
+     wishlist multiplie l'ensemble de la liste. */
+  function spawnRate(wl, wbWishlist, wbStar, disabled, unclaimed, total, personalRare, wishProtection){
     var pool = unclaimed - disabled + Math.pow(1 - unclaimed / total, personalRare) * total;
-    if(pool <= 0) return 0;
-    return (wl * (1 + wbBadge / 100) + wbFirst / 100) / pool;
+    var protection = wishProtection > 0 ? 1 / wishProtection : 0;
+    if(pool <= 0) return protection;
+    return (wl * (1 + wbWishlist / 100) + wbStar / 100) / pool + protection;
   }
 
-  function atLeastKInN(p, k, n){
-    if(p <= 0) return 0;
-    if(p >= 1) return 1;
-    var total = 0;
-    for(var z = k; z <= n; z++){
-      var logC = 0;
-      for(var i = 1; i <= z; i++){
-        logC += Math.log(n - z + i) - Math.log(i);
-      }
-      total += Math.exp(logC + z * Math.log(p) + (n - z) * Math.log(1 - p));
+  /* Arbitrage : investir monte la chance par roll mais retire des rolls.
+     On maximise donc le nombre de wishes attendus = chance x rolls restants. */
+  function optimize(cfg){
+    var rows = [], best = null;
+    for(var i = 0; i <= cfg.investable; i++){
+      var wbW = cfg.wbWishlistBase + wishBonus(i);
+      var wbS = cfg.wbStarBase + starWishBonus(i);
+      var p = spawnRate(cfg.wl, wbW, wbS, cfg.disabled, cfg.unclaimed,
+                        cfg.total, cfg.pr, cfg.wishProtection);
+      var pClamped = Math.max(0, Math.min(1, p));
+      var rollsLeft = cfg.totalRolls - i;
+      var row = {
+        i: i, wbW: wbW, wbS: wbS, p: pClamped,
+        rollsLeft: rollsLeft, expected: pClamped * rollsLeft
+      };
+      rows.push(row);
+      if(!best || row.expected > best.expected) best = row;
     }
-    return Math.min(1, total);
+    var none = rows[0];
+    return {
+      rows: rows, best: best, none: none,
+      gain: none.expected > 0 ? (best.expected / none.expected - 1) * 100 : 0
+    };
   }
 
-  function renderRate(){
+  /* Rejoue le calcul avec un autre nombre de rolls bonus. Ces rolls font
+     partie du total : en gagner davantage augmente aussi les rolls
+     disponibles, d'où le recalcul de totalRolls à partir des rolls non
+     bonus (base = total - bonus). */
+  function withBonusRolls(cfg, bonus){
+    var baseRolls = cfg.totalRolls - cfg.investable;
+    return {
+      wl: cfg.wl, wbWishlistBase: cfg.wbWishlistBase, wbStarBase: cfg.wbStarBase,
+      disabled: cfg.disabled, unclaimed: cfg.unclaimed, total: cfg.total,
+      pr: cfg.pr, wishProtection: cfg.wishProtection,
+      totalRolls: baseRolls + bonus, investable: bonus
+    };
+  }
+
+  /* À partir de combien de rolls bonus $bw dépasse-t-il le seuil visé ?
+     C'est le levier dominant : plus tu peux investir, plus le boost
+     acheté compense les rolls sacrifiés. La taille de la wishlist joue
+     beaucoup moins (son effet plafonne vite). */
+  function bonusRollsThreshold(cfg, targetGain){
+    for(var b = cfg.investable + 1; b <= 400; b++){
+      if(optimize(withBonusRolls(cfg, b)).gain >= targetGain) return b;
+    }
+    return null;
+  }
+
+  var WORTH_IT = 10;   // seuil de gain, en %, à partir duquel $bw vaut le détour
+
+  /* Verdict en langage clair : est-ce que ça vaut le coup maintenant, et
+     sinon à partir de quelle taille de wishlist ça le devient. */
+  function renderVerdict(cfg, gain, best){
+    var el = $("bwStatus");
+
+    if(best.i === 0){
+      Utils.setStatus(el,
+        "N'investis rien. Chaque roll placé dans $bw te coûte plus qu'il ne te rapporte.", "warn");
+      return;
+    }
+
+    if(gain >= WORTH_IT){
+      Utils.setStatus(el,
+        "Ça vaut le coup : $bw " + best.i + " te rapporte " + gain.toFixed(0) +
+        "% de wishes en plus.", "ok");
+      return;
+    }
+
+    var needed = bonusRollsThreshold(cfg, WORTH_IT);
+    var msg = "Pas vraiment rentable : +" + gain.toFixed(1) + "% seulement. ";
+    if(needed){
+      msg += "$bw dépasse +" + WORTH_IT + "% à partir d'environ " + needed +
+             " rolls bonus investissables (tu en as " + cfg.investable + ").";
+    } else {
+      msg += "Ton boost wishlist est déjà si élevé que $bw n'y ajoute plus grand-chose.";
+    }
+    Utils.setStatus(el, msg, "warn");
+  }
+
+  function renderOptimizer(){
     var wl = parseFloat($("srWishes").value) || 0;
-    var wbBadge = parseFloat($("srBadgeBoost").value) || 0;
-    var wbFirst = parseFloat($("srFirstBoost").value) || 0;
+    var wbWishlistBase = parseFloat($("srBadgeBoost").value) || 0;
+    var wbStarBase = parseFloat($("srStarBoost").value) || 0;
     var disabled = parseFloat($("srDisabled").value) || 0;
     var unclaimed = parseFloat($("srUnclaimed").value) || 0;
     var total = parseFloat($("srTotal").value) || 1;
     var pr = parseFloat($("srPersonalRare").value) || 0;
-    var rolls = parseInt($("srRolls").value, 10) || 1;
-    var wanted = parseInt($("srWanted").value, 10) || 1;
+    var wishProtection = parseFloat($("srWishProtection").value) || 0;
+    var totalRolls = parseInt($("srRolls").value, 10) || 0;
 
-    var p = spawnRate(wl, wbBadge, wbFirst, disabled, unclaimed, total, pr);
-    var pClamped = Math.max(0, Math.min(1, p));
-    var multi = atLeastKInN(pClamped, wanted, rolls);
-
-    var html = "";
-    html += statCard("Chance par roll", (pClamped * 100).toFixed(3) + "%", "probabilité d'un wish sur un roll", "teal");
-    html += statCard("Sur " + rolls + " rolls", (multi * 100).toFixed(2) + "%", "chance d'au moins " + wanted + " wish(es)", "purple");
-    html += statCard("Wishes attendus", (pClamped * rolls).toFixed(2), "en moyenne sur " + rolls + " rolls", "orange");
-    html += statCard("Rolls moyens", pClamped > 0 ? Math.round(1 / pClamped) : "∞", "pour obtenir un wish", "blue");
-    $("srResult").innerHTML = html;
-  }
-
-  function renderOptimizer(){
-    var totalRolls = parseInt($("bwTotalRolls").value, 10) || 0;
     var investable = parseInt($("bwInvestable").value, 10) || 0;
-    var baseBonus = parseFloat($("bwBaseBonus").value) || 0;
     var current = parseInt($("bwCurrent").value, 10) || 0;
 
     if(totalRolls <= 0){
-      alert("Renseigne un nombre de rolls par heure supérieur à zéro.");
+      Utils.setStatus($("bwStatus"),
+        "Renseigne tes rolls disponibles dans Mes stats (ou dans les réglages avancés).", "error");
       return;
     }
-    investable = Math.min(investable, totalRolls - 1);
+    investable = Math.max(0, Math.min(investable, totalRolls));
 
-    var rows = [];
-    var best = { n: 0, score: -1 };
-    for(var n = 0; n <= investable; n++){
-      var eff = totalRolls - n;
-      var mult = 1 + baseBonus / 100 + wishBonus(n) / 100;
-      var score = eff * mult;
-      rows.push({ n: n, eff: eff, mult: mult, score: score });
-      if(score > best.score) best = { n: n, score: score, mult: mult, eff: eff };
-    }
+    var cfg = {
+      wl: wl, wbWishlistBase: wbWishlistBase, wbStarBase: wbStarBase,
+      disabled: disabled, unclaimed: unclaimed, total: total,
+      pr: pr, wishProtection: wishProtection,
+      totalRolls: totalRolls, investable: investable
+    };
 
-    var none = rows[0];
+    var res = optimize(cfg);
+    var rows = res.rows, best = res.best, none = res.none, gain = res.gain;
     var currentRow = rows[Math.min(current, rows.length - 1)];
-    var gainVsNone = (best.score / none.score - 1) * 100;
-    var gainVsCurrent = (best.score / currentRow.score - 1) * 100;
+    var gainVsCurrent = currentRow.expected > 0 ? (best.expected / currentRow.expected - 1) * 100 : 0;
 
     var html = "";
-    html += statCard("Rolls à investir", best.n, "dans $bw, sur " + investable + " investissables", "orange");
-    html += statCard("Rolls restants", best.eff + " / h", "non investis, toujours lancés", "teal");
-    html += statCard("Bonus wishlist", "+" + wishBonus(best.n) + "%", "apporté par le boost", "purple");
-    html += statCard("Multiplicateur", "x" + best.mult.toFixed(2), "sur le taux de spawn wishlist", "purple");
-    html += statCard("Bonus starwish", "+" + starBonus(best.n) + "%", "effet secondaire du boost", "pink");
-    html += statCard("Gain vs 0 roll", "+" + gainVsNone.toFixed(1) + "%", "sans aucun investissement", "teal");
-    html += statCard("Gain vs actuel", (gainVsCurrent >= 0 ? "+" : "") + gainVsCurrent.toFixed(1) + "%",
-      "contre tes " + current + " rolls actuels", gainVsCurrent >= 0 ? "teal" : "red");
+    html += statCard("Rolls à investir", best.i, "sur " + investable + " investissables");
+    html += statCard("Wishes attendus", fmtWishes(best.expected),
+      everyNRolls(best.expected, best.rollsLeft));
+    html += statCard("Chance par roll", (best.p * 100).toFixed(3) + "%",
+      "sur " + best.rollsLeft + " rolls restants");
+    html += statCard("Gain", "+" + gain.toFixed(gain < 10 ? 1 : 0) + "%",
+      current > 0 ? (gainVsCurrent >= 0 ? "+" : "") + gainVsCurrent.toFixed(1) + "% vs tes " + current + " actuels"
+                  : "contre " + fmtWishes(none.expected) + " sans investir");
     $("bwStats").innerHTML = html;
-    $("bwCommand").textContent = "$bw " + best.n;
+
+    $("bwCommand").textContent = "$bw " + best.i;
+    $("bwBoosts").textContent =
+      "Boost wishlist +" + best.wbW + "% (dont +" + wishBonus(best.i) + "% via $bw) · " +
+      "boost star wish +" + best.wbS + "% (dont +" + starWishBonus(best.i) + "%)";
 
     var chart = $("bwChart");
     chart.innerHTML = "";
     var step = Math.max(1, Math.ceil(investable / 24));
     var marks = [];
     for(var m = 0; m <= investable; m += step) marks.push(m);
-    if(marks.indexOf(best.n) === -1) marks.push(best.n);
+    if(marks.indexOf(best.i) === -1) marks.push(best.i);
     marks.sort(function(a, b){ return a - b; });
 
     marks.forEach(function(m){
       var row = rows[m];
       if(!row) return;
+      var ratio = best.expected > 0 ? row.expected / best.expected : 0;
       var line = document.createElement("div");
-      line.className = "bar-line" + (m === best.n ? " peak" : "");
+      line.className = "bar-line" + (m === best.i ? " peak" : "");
       var lbl = document.createElement("div");
       lbl.className = "lbl";
       lbl.textContent = "$bw " + m;
@@ -135,17 +213,18 @@ var BoostWish = (function(){
       bar.className = "bar";
       var fill = document.createElement("div");
       fill.className = "fill";
-      fill.style.width = (row.score / best.score * 100).toFixed(1) + "%";
+      fill.style.width = (ratio * 100).toFixed(1) + "%";
       bar.appendChild(fill);
       var val = document.createElement("div");
       val.className = "val";
-      val.textContent = (row.score / best.score * 100).toFixed(0) + "%";
+      val.textContent = fmtWishes(row.expected);
       line.appendChild(lbl);
       line.appendChild(bar);
       line.appendChild(val);
       chart.appendChild(line);
     });
 
+    renderVerdict(cfg, gain, best);
     $("bwResultCard").style.display = "block";
   }
 
@@ -154,8 +233,6 @@ var BoostWish = (function(){
     $("bwCopyBtn").addEventListener("click", function(){
       Utils.copyText($("bwCommand").textContent, this);
     });
-    $("srCalcBtn").addEventListener("click", renderRate);
-    renderRate();
   }
 
   return { init: init };

@@ -169,9 +169,6 @@ textarea{
   min-height:120px;
 }
 
-.quick-add-row{display:flex;gap:var(--s-2);align-items:stretch;}
-.quick-add-row input{flex:1;min-width:0;}
-.quick-add-row button{flex:none;}
 
 /* Champ de recherche avec icône */
 .search-field{position:relative;}
@@ -401,6 +398,131 @@ button:active{
   box-shadow:var(--e-4);
   animation:modalIn var(--d-base) var(--ease-spring);
 }
+.modal.modal-lg{max-width:600px;}
+.modal-head{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:var(--s-3);
+  margin-bottom:2px;
+}
+.modal-head h3{margin:0;}
+.modal-close{
+  flex:none;
+  width:32px;height:32px;
+  min-height:auto;
+  padding:0;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;line-height:1;
+  color:var(--text-dim);
+}
+
+/* ---- Blocs de collage des sorties de commandes (popup stats) ---- */
+.paste-grid{
+  display:grid;
+  gap:var(--s-3);
+  margin:var(--s-4) 0;
+}
+.paste-block label{
+  display:flex;align-items:baseline;gap:var(--s-2);
+  margin-bottom:6px;
+  text-transform:none;
+  letter-spacing:normal;
+}
+.paste-block label code{
+  font-family:var(--font-mono);
+  font-size:var(--t-sm);
+  font-weight:var(--fw-semi);
+  color:var(--text);
+  background:var(--surface2);
+  border:1px solid var(--border-subtle);
+  border-radius:var(--r-sm);
+  padding:2px 7px;
+}
+.paste-block label span{
+  font-size:var(--t-xs);
+  color:var(--text-dim);
+  font-weight:var(--fw-normal);
+}
+.paste-block textarea{
+  margin:0;
+  min-height:auto;
+  font-family:var(--font-mono);
+  font-size:var(--t-xs);
+  resize:vertical;
+}
+.paste-result{
+  margin:5px 0 0;
+  font-size:var(--t-xs);
+  color:var(--text-dim);
+  min-height:1em;
+}
+.paste-extra{
+  display:flex;align-items:center;gap:var(--s-2);
+  margin-top:6px;
+}
+.paste-extra label{
+  margin:0;
+  flex:none;
+  font-size:var(--t-xs);
+  color:var(--text-dim);
+  text-transform:none;
+  letter-spacing:normal;
+}
+.paste-extra select{margin:0;}
+
+.stats-advanced{
+  border-top:1px solid var(--border-subtle);
+  padding-top:var(--s-3);
+}
+/* Couleur pleine et non « dim » : un summary est un contrôle cliquable,
+   il doit rester lisible — en thème clair, --text-dim tombait à 2.25:1,
+   sous le minimum AA de 4.5. */
+.stats-advanced summary{
+  cursor:pointer;
+  font-size:var(--t-sm);
+  color:var(--text);
+  margin-bottom:var(--s-2);
+}
+.stats-advanced summary:hover{color:var(--fg);}
+
+/* ---- Bulle "premier passage" pointant vers le bouton stats ---- */
+.stats-nudge{
+  position:absolute;
+  z-index:150;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  padding:var(--s-3) var(--s-4);
+  box-shadow:var(--e-4);
+  max-width:240px;
+  font-size:var(--t-sm);
+  color:var(--text);
+  animation:bubbleIn var(--d-base) var(--ease-spring);
+}
+.stats-nudge::before{
+  content:"";
+  position:absolute;
+  top:-6px;right:22px;
+  width:12px;height:12px;
+  background:var(--surface);
+  border-left:1px solid var(--border);
+  border-top:1px solid var(--border);
+  transform:rotate(45deg);
+}
+.stats-nudge .nudge-close{
+  position:absolute;
+  top:6px;right:6px;
+  width:22px;height:22px;
+  min-height:auto;
+  padding:0;
+  border:none;
+  background:transparent;
+  color:var(--text-dim);
+  font-size:14px;
+  line-height:1;
+  border-radius:50%;
+}
+.stats-nudge .nudge-close:hover{background:var(--surface2);}
 @keyframes fadeIn{ from{opacity:0} to{opacity:1} }
 @keyframes modalIn{
   from{opacity:0;transform:translateY(12px) scale(.97)}
@@ -492,7 +614,7 @@ button:active{
    structure, ni les IDs, ni la logique de bascule d'onglet.
    ============================================================ */
 #panel-sprites, #panel-cropper, #panel-solvers, #panel-wish, #panel-boost,
-#panel-haremsort, #panel-colors, #panel-stats{
+#panel-haremsort, #panel-colors{
   --panel-accent:var(--fg);
   --panel-accent-2:#9a9a9a;
   --panel-glow:var(--glow-mono);
@@ -767,6 +889,364 @@ button:active{
   text-align:center;
 }
 .tag-bubble-delete{width:100%;}
+
+/* ---- Menu "Versions" (historique de sauvegarde locale) ---- */
+.versions-menu{
+  position:absolute;
+  z-index:200;
+  background:var(--surface);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  padding:var(--s-2);
+  box-shadow:var(--e-4);
+  min-width:180px;
+  max-height:260px;
+  overflow-y:auto;
+  animation:bubbleIn var(--d-base) var(--ease-spring);
+}
+.versions-item{
+  display:block;
+  width:100%;
+  text-align:left;
+  background:transparent;
+  border:none;
+  border-radius:var(--r-sm);
+  padding:var(--s-2) var(--s-3);
+  font-size:var(--t-sm);
+  color:var(--text);
+  min-height:auto;
+}
+.versions-item:hover{background:var(--surface2);}
+.versions-empty{
+  padding:var(--s-2) var(--s-3);
+  font-size:var(--t-xs);
+  color:var(--text-dim);
+}
+
+/* ---- Roue de couleur (remplace l'extraction auto quand elle échoue
+   à cause du CORS sur les images hébergées hors imgur) ---- */
+.color-wheel-popup{
+  position:absolute;
+  z-index:200;
+  background:var(--surface);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  padding:var(--s-3);
+  box-shadow:var(--e-4);
+  width:200px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:var(--s-2);
+  animation:bubbleIn var(--d-base) var(--ease-spring);
+}
+.cw-canvas{border-radius:50%;cursor:crosshair;touch-action:none;}
+.cw-light{width:100%;}
+.cw-preview-row{display:flex;align-items:center;gap:var(--s-2);width:100%;}
+.cw-swatch{
+  width:24px;height:24px;border-radius:50%;
+  border:1px solid var(--border);
+  flex:none;
+}
+.cw-hex{font-family:var(--font-mono);font-size:var(--t-sm);color:var(--text-dim);}
+.color-wheel-popup .preset-row{justify-content:center;}
+.cw-close{width:100%;}
+
+/* ============================================================
+   HARMONISATION DES ONGLETS — passe finale
+   Un seul langage visuel pour les titres, les en-têtes de carte,
+   les encarts et les sections repliables. Chargée en dernier pour
+   neutraliser les teintes historiques de style.css (info-box
+   violette, warn-box orange) qui juraient avec le reste.
+   ============================================================ */
+
+/* ---- Titre de section : filet d'accent plus franc ---- */
+.panel h1{
+  padding-left:var(--s-4);
+  margin-bottom:var(--s-2);
+}
+.panel h1::before{
+  width:3px;
+  top:.18em;bottom:.18em;
+  background:linear-gradient(180deg,
+    var(--panel-accent, var(--fg)) 0%,
+    rgba(var(--fg-rgb),.25) 100%);
+}
+
+/* ---- En-tête de carte : séparé du contenu par un filet ---- */
+.card h2,
+.card > summary{
+  display:flex;align-items:center;gap:var(--s-3);
+  font-size:var(--t-lg);
+  font-weight:var(--fw-semi);
+  letter-spacing:-.01em;
+  padding-bottom:var(--s-3);
+  margin:0 0 var(--s-4);
+  border-bottom:1px solid var(--border-subtle);
+}
+
+/* Puce d'étape : chiffre monospace centré dans un cercle */
+.card h2 .num{
+  width:26px;height:26px;flex:none;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;
+  background:rgba(var(--fg-rgb),.04);
+  border:1px solid rgba(var(--fg-rgb),.28);
+  color:var(--fg);
+  font-family:var(--font-mono);
+  font-size:var(--t-xs);
+  font-weight:var(--fw-semi);
+  font-variant-numeric:tabular-nums;
+  line-height:1;
+}
+
+/* Liseré clair sur l'arête haute : donne du relief sans ombre lourde */
+.card{
+  box-shadow:var(--e-2), inset 0 1px 0 rgba(var(--fg-rgb),.05);
+}
+.card:hover{
+  box-shadow:var(--e-3), inset 0 1px 0 rgba(var(--fg-rgb),.07);
+}
+.panel .card:hover{
+  box-shadow:var(--e-3), inset 0 1px 0 rgba(var(--fg-rgb),.07),
+             var(--panel-glow, var(--glow-mono));
+}
+
+/* ---- Encarts : même structure, seul le filet gauche change ----
+   L'info est neutre (monochrome), l'avertissement garde une teinte
+   ambrée : c'est un signal fonctionnel, pas une décoration. */
+.info-box,.warn-box{
+  background:var(--surface2);
+  border:1px solid var(--border-subtle);
+  border-left:3px solid rgba(var(--fg-rgb),.3);
+  border-radius:var(--r-md);
+  padding:var(--s-3) var(--s-4);
+  margin-top:var(--s-4);
+  font-size:var(--t-sm);
+  line-height:var(--lh-relaxed);
+  color:var(--text);
+}
+.warn-box{
+  border-left-color:var(--orange);
+  color:var(--text);
+}
+.info-box code,.warn-box code{
+  font-family:var(--font-mono);
+  font-size:.92em;
+  background:rgba(var(--fg-rgb),.07);
+  border-radius:var(--r-sm);
+  padding:1px 5px;
+}
+.info-box .tips,.warn-box .tips{margin:var(--s-2) 0 0;}
+.info-box .hint,.warn-box .hint{margin-bottom:0;}
+
+/* ---- Statut : même grammaire que les encarts ---- */
+.status{
+  background:var(--surface2);
+  border:1px solid var(--border-subtle);
+  border-left-width:3px;
+  border-left-color:rgba(var(--fg-rgb),.3);
+  font-size:var(--t-sm);
+  margin-top:var(--s-3);
+}
+
+/* ---- Sections repliables : chevron unifié ---- */
+.stats-advanced summary,
+.card > summary{
+  cursor:pointer;
+  list-style:none;
+  display:flex;
+  align-items:center;
+  gap:var(--s-2);
+}
+.stats-advanced summary::-webkit-details-marker,
+.card > summary::-webkit-details-marker{display:none;}
+.stats-advanced summary::before,
+.card > summary::before{
+  content:"";
+  flex:none;
+  width:6px;height:6px;
+  border-right:1.5px solid currentColor;
+  border-bottom:1.5px solid currentColor;
+  transform:rotate(-45deg);
+  opacity:.6;
+  transition:transform var(--d-fast) var(--ease-out);
+}
+.stats-advanced[open] summary::before,
+.card[open] > summary::before{transform:rotate(45deg);}
+.stats-advanced summary:hover::before,
+.card > summary:hover::before{opacity:1;}
+
+/* Un <details class="card"> replié ne doit pas garder la marge
+   intérieure d'une carte ouverte sous son en-tête. */
+details.card:not([open]) > summary{
+  margin-bottom:0;
+  padding-bottom:0;
+  border-bottom:none;
+}
+
+/* ============================================================
+   PROFONDEUR — halo au curseur, liseré lumineux, entrée en cascade.
+   Trois effets qui se cumulent sans alourdir : tout est en CSS pur,
+   seul le halo a besoin de deux variables posées par app.js.
+   ============================================================ */
+
+/* ---- Halo qui suit le curseur ----
+   ::before porte déjà le balayage de reflet, on utilise donc ::after.
+   z-index:-1 le place sous le contenu, dans le contexte isolé de la
+   carte (isolation:isolate), donc jamais au-dessus du texte. */
+.card::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(
+    460px circle at var(--cx, 50%) var(--cy, 0%),
+    rgba(var(--fg-rgb),.09),
+    transparent 62%);
+  opacity:var(--spot, 0);
+  transition:opacity var(--d-base) var(--ease-out);
+  pointer-events:none;
+  z-index:-1;
+}
+
+/* ---- Entrée en cascade au changement d'onglet ----
+   Chaque bloc du panneau arrive avec un léger décalage : la page se
+   compose au lieu d'apparaître d'un bloc. */
+.panel.active > *{
+  animation:panelRise .45s var(--ease-out) both;
+}
+.panel.active > *:nth-child(1){animation-delay:.00s;}
+.panel.active > *:nth-child(2){animation-delay:.04s;}
+.panel.active > *:nth-child(3){animation-delay:.08s;}
+.panel.active > *:nth-child(4){animation-delay:.12s;}
+.panel.active > *:nth-child(5){animation-delay:.16s;}
+.panel.active > *:nth-child(6){animation-delay:.20s;}
+.panel.active > *:nth-child(n+7){animation-delay:.24s;}
+@keyframes panelRise{
+  from{opacity:0;transform:translateY(10px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+@media (prefers-reduced-motion: reduce){
+  .panel.active > *{animation:none;}
+  .card::after{display:none;}
+}
+
+/* ============================================================
+   DENSITÉ — moins de défilement
+   Les cartes appariées sont alignées en haut (sinon la plus courte
+   s'étire à la hauteur de la plus grande) et perdent leur marge
+   basse, déjà assurée par le gap de la grille.
+   ============================================================ */
+.grid-start{align-items:start;}
+.grid-2 > .card{margin-bottom:0;}
+.grid-2 > div > .card:last-child{margin-bottom:0;}
+
+/* Colonne principale plus large quand le contenu de droite est court
+   (liste de personnages à gauche, bloc de commandes à droite). */
+.grid-wide{grid-template-columns:1.45fr 1fr;}
+@media (max-width:960px){
+  .grid-wide{grid-template-columns:1fr;}
+}
+
+/* Respiration resserrée : gagne plusieurs centaines de pixels sur
+   l'ensemble d'un panneau sans tasser la lecture. */
+.card{padding:var(--s-4) var(--s-5);margin-bottom:var(--s-3);}
+.panel .subtitle{margin-bottom:var(--s-5);}
+textarea{min-height:96px;}
+
+/* ============================================================
+   TITRE D'ONGLET — grand, centré, dégradé
+   Le filet d'accent passe de la gauche à un trait court sous le
+   titre, seule position cohérente avec un texte centré.
+   ============================================================ */
+.panel h1{
+  text-align:center;
+  padding-left:0;
+  font-family:var(--font-display);
+  font-size:clamp(2rem, 4.4vw, 3.1rem);
+  font-weight:var(--fw-bold);
+  letter-spacing:-.035em;
+  line-height:1.05;
+  margin:var(--s-5) 0 var(--s-5);
+  background-image:linear-gradient(180deg,
+    var(--fg) 0%,
+    rgba(var(--fg-rgb),.62) 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+.panel h1::before{
+  left:50%;
+  right:auto;
+  top:auto;
+  bottom:-14px;
+  transform:translateX(-50%);
+  width:64px;
+  height:3px;
+  background:linear-gradient(90deg,
+    transparent,
+    var(--panel-accent, var(--fg)),
+    transparent);
+}
+.panel .subtitle{
+  text-align:center;
+  margin-left:auto;
+  margin-right:auto;
+  max-width:62ch;
+}
+
+/* ============================================================
+   ÉCRANS VIDES — une liste sans contenu ne doit pas être un trou
+   ============================================================ */
+.empty-state{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  gap:var(--s-2);
+  padding:var(--s-8) var(--s-4);
+  border:1px dashed rgba(var(--fg-rgb),.16);
+  border-radius:var(--r-lg);
+  background:rgba(var(--fg-rgb),.02);
+}
+.empty-icon{
+  width:44px;height:44px;
+  color:rgba(var(--fg-rgb),.32);
+  animation:emptyFloat 4.5s ease-in-out infinite;
+}
+@keyframes emptyFloat{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-5px);}
+}
+/* Cristal kakera en guise de marque, à la place du losange générique */
+.brand-kakera{
+  width:19px;height:19px;
+  flex:none;
+  color:var(--fg);
+  filter:drop-shadow(0 0 7px rgba(var(--fg-rgb),.45));
+}
+
+.empty-title{
+  margin:0;
+  font-size:var(--t-sm);
+  font-weight:var(--fw-semi);
+  color:var(--text);
+}
+.empty-hint{
+  margin:0;
+  font-size:var(--t-xs);
+  color:var(--text-dim);
+  max-width:34ch;
+}
+@media (prefers-reduced-motion: reduce){
+  .empty-icon{animation:none;}
+}
 
 /* ---- Responsive ---- */
 @media (max-width:640px){
