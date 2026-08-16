@@ -55,61 +55,152 @@ var Solvers = (function(){
     }
   }
 
-  function ocColorFor(r, c, rr, rc){
-    var dr = r - rr, dc = c - rc;
-    if(dr === 0 && dc === 0) return "red";
-    var chebyshev = Math.max(Math.abs(dr), Math.abs(dc));
-    if(chebyshev === 1){
-      return (Math.abs(dr) === 1 && Math.abs(dc) === 1) ? "yellow" : "orange";
+  /* ---- $ourochest : modèle probabiliste ----
+     Les couleurs ne sont PAS une fonction déterministe de la position.
+     Le jeu place 1 rouge (jamais au centre), puis TIRE AU SORT :
+       - 2 oranges parmi les cases adjacentes à la rouge
+       - 3 jaunes  parmi les cases de ses diagonales (à n'importe quelle distance)
+       - 4 vertes  parmi les cases de sa ligne/colonne, hors oranges
+       - cyan : le reste des lignes, colonnes et diagonales
+       - bleu : tout ce qui n'est ni ligne, ni colonne, ni diagonale
+     Seuls le rouge et le bleu sont donc certains. Une case adjacente à la
+     rouge n'est orange que 2 fois sur le nombre de ses voisines : c'est ce
+     qui manquait, et qui faussait les probabilités affichées.
+     Dans une grille 5x5 chaque case a toujours 4 autres cases sur sa ligne
+     et 4 sur sa colonne, donc |ligne+colonne| vaut toujours 8. */
+
+  function ocRelation(x, red){
+    if(x === red) return "self";
+    var xr = Math.floor(x / 5), xc = x % 5;
+    var rr = Math.floor(red / 5), rc = red % 5;
+    var dr = xr - rr, dc = xc - rc;
+    if(dr === 0 || dc === 0){
+      return Math.max(Math.abs(dr), Math.abs(dc)) === 1 ? "orth" : "line";
     }
-    if(dr === 0 || dc === 0) return "green";
-    if(Math.abs(dr) === Math.abs(dc)) return "teal";
-    return "blue";
+    if(Math.abs(dr) === Math.abs(dc)) return "diag";
+    return "off";
   }
 
-  function ocCandidatePositions(){
-    var all = [];
-    for(var i = 0; i < 25; i++) all.push(i);
-    if($("ocExcludeCenter").checked){
-      return all.filter(function(i){ return i !== 12; });
+  var ocCountCache = {};
+  function ocCounts(red){
+    if(ocCountCache[red]) return ocCountCache[red];
+    var orth = 0, diag = 0;
+    for(var i = 0; i < 25; i++){
+      var rel = ocRelation(i, red);
+      if(rel === "orth") orth++;
+      else if(rel === "diag") diag++;
     }
-    return all;
+    return (ocCountCache[red] = { orth: orth, diag: diag, line: 8 });
+  }
+
+  // P(la case x affiche `color` | la rouge est en `red`)
+  function ocLikelihood(x, red, color){
+    var rel = ocRelation(x, red);
+    var n = ocCounts(red);
+
+    if(rel === "self") return color === "red" ? 1 : 0;
+    if(rel === "off")  return color === "blue" ? 1 : 0;
+
+    if(rel === "diag"){
+      if(color === "yellow") return 3 / n.diag;
+      if(color === "teal")   return (n.diag - 3) / n.diag;
+      return 0;
+    }
+
+    // sur la ligne/colonne : 2 oranges tirées, puis 4 vertes parmi les 6 restantes
+    var rest = n.line - 2;
+    var pGreen = 4 / rest;
+    var pTeal  = (rest - 4) / rest;
+
+    if(rel === "orth"){
+      var pOrange = 2 / n.orth;
+      var notOrange = 1 - pOrange;
+      if(color === "orange") return pOrange;
+      if(color === "green")  return notOrange * pGreen;
+      if(color === "teal")   return notOrange * pTeal;
+      return 0;
+    }
+
+    if(color === "green") return pGreen;
+    if(color === "teal")  return pTeal;
+    return 0;
+  }
+
+  /* Distribution de probabilité de la position de la rouge, sachant les
+     cases déjà révélées. Les positions ne sont plus équiprobables. */
+  function ocPosterior(grid){
+    var weights = new Array(25).fill(0), total = 0;
+    for(var red = 0; red < 25; red++){
+      if(red === 12) continue;              // la rouge n'est jamais au centre
+      var l = 1;
+      for(var x = 0; x < 25 && l > 0; x++){
+        if(grid[x] === null) continue;
+        l *= ocLikelihood(x, red, grid[x]);
+      }
+      weights[red] = l;
+      total += l;
+    }
+    if(total <= 0) return weights;
+    return weights.map(function(w){ return w / total; });
   }
 
   function ocSolve(grid){
-    return ocCandidatePositions().filter(function(pos){
-      var rr = Math.floor(pos / 5), rc = pos % 5;
-      for(var r = 0; r < 5; r++){
-        for(var c = 0; c < 5; c++){
-          var idx = r * 5 + c;
-          if(grid[idx] === null) continue;
-          if(ocColorFor(r, c, rr, rc) !== grid[idx]) return false;
-        }
-      }
-      return true;
-    });
+    var p = ocPosterior(grid);
+    var out = [];
+    for(var i = 0; i < 25; i++) if(p[i] > 1e-12) out.push(i);
+    return out;
   }
 
-  function ocBestMove(grid, candidates){
-    var best = null, bestScore = Infinity;
+  /* Meilleur clic : celui qui minimise le nombre de clics attendu jusqu'à
+     toucher la rouge. Recherche en profondeur limitée — la recommandation
+     est identique en profondeur 2, 3 et 4, seule l'estimation du nombre de
+     clics s'affine, donc on garde la plus rapide. */
+  var OC_COLORS = ["orange", "yellow", "green", "teal", "blue"];
+
+  function ocExpected(belief, depth){
+    var live = belief.filter(function(b){ return b.w > 1e-12; });
+    if(live.length <= 1) return { clicks: 1, move: live.length ? live[0].i : null };
+    if(depth <= 0) return { clicks: 1 + live.length, move: live[0].i };
+
+    var bestMove = null, bestClicks = Infinity;
     for(var i = 0; i < 25; i++){
-      if(grid[i] !== null) continue;
-      var r = Math.floor(i / 5), c = i % 5;
-      var groups = {};
-      candidates.forEach(function(cand){
-        var color = ocColorFor(r, c, Math.floor(cand / 5), cand % 5);
-        groups[color] = (groups[color] || 0) + 1;
-      });
-      var worst = 0;
-      Object.keys(groups).forEach(function(k){
-        if(groups[k] > worst) worst = groups[k];
-      });
-      if(worst < bestScore){
-        bestScore = worst;
-        best = i;
+      var pRed = 0;
+      for(var b = 0; b < live.length; b++) if(live[b].i === i) pRed = live[b].w;
+
+      var expected = 1, informative = false;
+      for(var c = 0; c < OC_COLORS.length; c++){
+        var sub = [], mass = 0;
+        for(var k = 0; k < live.length; k++){
+          var l = ocLikelihood(i, live[k].i, OC_COLORS[c]);
+          if(l > 0){
+            var w = live[k].w * l;
+            sub.push({ i: live[k].i, w: w });
+            mass += w;
+          }
+        }
+        if(mass <= 1e-12) continue;
+        if(sub.length < live.length) informative = true;
+        for(var s = 0; s < sub.length; s++) sub[s].w /= mass;
+        expected += mass * ocExpected(sub, depth - 1).clicks;
+      }
+
+      // un clic qui n'apprend rien et ne peut pas gagner est inutile
+      if(!informative && pRed <= 1e-12) continue;
+      if(expected < bestClicks - 1e-12){
+        bestClicks = expected;
+        bestMove = i;
       }
     }
-    return best;
+    return { clicks: bestClicks, move: bestMove };
+  }
+
+  function ocBestMove(grid){
+    var p = ocPosterior(grid);
+    var belief = [];
+    for(var i = 0; i < 25; i++) if(p[i] > 1e-12) belief.push({ i: i, w: p[i] });
+    if(!belief.length) return null;
+    var depth = belief.length > 8 ? 2 : 3;
+    return ocExpected(belief, depth).move;
   }
 
   function oqNeighbors(idx){
@@ -237,20 +328,22 @@ var Solvers = (function(){
   function renderOc(){
     var clicks = 0;
     for(var i = 0; i < 25; i++) if(ocState[i] !== null) clicks++;
+    var probs = ocPosterior(ocState);
     var candidates = ocSolve(ocState);
-    var pool = ocCandidatePositions().length;
 
     var html = "<div class='stat-grid'>";
     html += miniStat("Clics utilisés", clicks + " / 5", "teal");
-    html += miniStat("Positions possibles", candidates.length + " / " + pool, "orange");
+    html += miniStat("Positions possibles", candidates.length + " / 24", "orange");
     html += "</div>";
 
+    // les positions ne sont pas équiprobables : chaque case affiche sa
+    // propre probabilité, issue du tirage des couleurs
     document.querySelectorAll("#ocGrid .cell").forEach(function(cell, idx){
       cell.classList.remove("candidate", "best");
       cell.textContent = "";
-      if(ocState[idx] === null && candidates.indexOf(idx) !== -1){
+      if(ocState[idx] === null && probs[idx] > 1e-12){
         cell.classList.add("candidate");
-        cell.textContent = Math.round(100 / candidates.length) + "%";
+        cell.textContent = (probs[idx] * 100).toFixed(1) + "%";
       }
     });
 
@@ -261,12 +354,21 @@ var Solvers = (function(){
         (Math.floor(candidates[0] / 5) + 1) + ", colonne " + (candidates[0] % 5 + 1) + ".</div>";
       document.querySelectorAll("#ocGrid .cell")[candidates[0]].classList.add("best");
     } else {
-      var best = ocBestMove(ocState, candidates);
-      if(best !== null){
+      var move = ocBestMove(ocState);
+      if(move !== null){
         html += "<div style='margin-top:6px;'>Prochain clic conseillé : <b>ligne " +
-          (Math.floor(best / 5) + 1) + ", colonne " + (best % 5 + 1) + "</b></div>";
-        document.querySelectorAll("#ocGrid .cell")[best].classList.add("best");
+          (Math.floor(move / 5) + 1) + ", colonne " + (move % 5 + 1) + "</b></div>";
+        document.querySelectorAll("#ocGrid .cell")[move].classList.add("best");
       }
+
+      var ranked = [];
+      for(var j = 0; j < 25; j++) if(probs[j] > 1e-12) ranked.push({ idx: j, p: probs[j] });
+      ranked.sort(function(a, b){ return b.p - a.p; });
+      html += "<div style='margin-top:8px;'>Positions les plus probables :</div>";
+      ranked.slice(0, 5).forEach(function(e){
+        html += "<div class='prob-row'><span>Ligne " + (Math.floor(e.idx / 5) + 1) +
+          ", colonne " + (e.idx % 5 + 1) + "</span><span>" + (e.p * 100).toFixed(1) + "%</span></div>";
+      });
     }
     $("ocResult").innerHTML = html;
   }
@@ -328,7 +430,6 @@ var Solvers = (function(){
       buildGrid($("otGrid"), otCycle, otState, renderOt);
       renderOt();
     });
-    $("ocExcludeCenter").addEventListener("change", renderOc);
     $("otBudget").addEventListener("input", renderOt);
   }
 

@@ -353,25 +353,20 @@
        <div class="grid-2 grid-start">
         <div class="card">
           <h2>Règles de $ourochest</h2>
-          <p>Une seule sphère rouge cachée, 5 clics. La couleur d'une case indique sa position relative à la rouge :</p>
+          <p>Une seule sphère rouge cachée (jamais au centre), 5 clics. Le jeu place ensuite un nombre <b>fixe</b> de chaque couleur :</p>
           <ul class="tips">
-            <li><b>Rouge</b> : c'est la case cherchée</li>
-            <li><b>Orange</b> : adjacente en ligne ou colonne</li>
-            <li><b>Jaune</b> : adjacente en diagonale</li>
-            <li><b>Vert</b> : même ligne ou colonne, plus loin</li>
-            <li><b>Sarcelle</b> : même diagonale, plus loin</li>
-            <li><b>Bleu</b> : aucune de ces relations</li>
+            <li><b>2 oranges</b> — adjacentes à la rouge</li>
+            <li><b>3 jaunes</b> — sur ses diagonales, à n'importe quelle distance</li>
+            <li><b>4 vertes</b> — dans sa ligne ou sa colonne</li>
+            <li><b>Cyan</b> — le reste des lignes, colonnes et diagonales</li>
+            <li><b>Bleu</b> — jamais dans la même ligne, colonne ni diagonale</li>
           </ul>
-          <p class="hint">Cet ordre correspond exactement à la séquence de clic des solveurs de référence (bleu → sarcelle → vert → jaune → orange → rouge), qui va du plus éloigné au plus proche.</p>
           <div class="warn-box">
-            Les solveurs de référence comptent <b>24 positions possibles</b>, pas 25 : les 25 signatures de couleur sont bien distinctes, une case n'est donc jamais occupée par la rouge. Le centre est le candidat le plus probable, sans confirmation officielle. Décoche la case ci-dessous si tu observes en jeu que le centre est possible.
+            <b>Les couleurs sont tirées au sort</b>, pas déduites de la distance. Une case adjacente à la rouge n'est orange que 2 fois sur son nombre de voisines : elle peut sortir verte ou cyan. Seuls le <b>rouge</b> et le <b>bleu</b> sont certains, c'est pourquoi les cases n'ont pas toutes la même probabilité.
           </div>
         </div>
         <div class="card">
           <h2>Grille</h2>
-          <div class="radio-row">
-            <label><input type="checkbox" id="ocExcludeCenter" checked> Exclure la case centrale (24 positions, comme les solveurs de référence)</label>
-          </div>
           <p class="hint">Clic gauche : couleur suivante. Clic droit : précédente. Le pourcentage est la probabilité que la case soit rouge.</p>
           <div class="oq-grid" id="ocGrid"></div>
           <div class="btn-row"><button class="small-btn" id="ocResetBtn">Réinitialiser</button></div>
