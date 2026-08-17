@@ -13,15 +13,30 @@ var WishFormator = (function(){
 
   var EXCLUSIVE = ["owned", "remove"];
 
+  /* Les bascules affichées sur chaque ligne, dans cet ordre.
+     ✅ y figure parce que l'import le reconnaît : sans badge, le tag était
+     posé (ligne grisée, nom barré) sans moyen de le voir ni de le retirer. */
+  var TOGGLES = [
+    { key: "priority", emoji: "🎯", cls: "tg-priority", label: "Prioritaire" },
+    { key: "star",     emoji: "⭐", cls: "tg-star",     label: "Starwish" },
+    { key: "lock",     emoji: "🔐", cls: "tg-lock",     label: "Lock" },
+    { key: "owned",    emoji: "✅", cls: "tg-owned",    label: "Déjà acquis" },
+    { key: "remove",   emoji: "🗑️", cls: "tg-remove",   label: "À retirer" }
+  ];
+
   var entries = [];
-  var circular = true;
+  // La wishlist Mudae est toujours circulaire : le dernier touche le premier.
+  // Ce n'est pas un reglage, chacun a donc exactement deux voisins.
+  var CIRCULAR = true;
   var dragIndex = null;
-  var activeBubble = null;
-  var TAG_EMOJI = { "⭐": "star", "✅": "owned", "🔐": "lock" };
+  /* Emojis reconnus à l'import. Chacun DOIT avoir sa bascule dans TOGGLES,
+     sinon le tag est posé sans être visible ni retirable. */
+  var TAG_EMOJI = { "⭐": "star", "✅": "owned", "🔐": "lock", "🗑️": "remove" };
+  var PRIORITY_EMOJI = "🎯";
   var store = Utils.createStore("mudae-wish");
 
   function persist(){
-    var state = { entries: entries, circular: circular };
+    var state = { entries: entries };
     store.save(state);
     store.checkpoint(state);
   }
@@ -36,8 +51,8 @@ var WishFormator = (function(){
     var n = order.length, total = 0;
     for(var i = 0; i < n; i++){
       if(!order[i].priority) continue;
-      var prev = circular ? (i - 1 + n) % n : i - 1;
-      var next = circular ? (i + 1) % n : i + 1;
+      var prev = (i - 1 + n) % n;
+      var next = (i + 1) % n;
       if(prev >= 0 && prev < n) total += order[prev].give;
       if(next >= 0 && next < n) total += order[next].give;
     }
@@ -109,21 +124,32 @@ var WishFormator = (function(){
 
   function restoreState(state){
     entries = state.entries || [];
-    circular = !!state.circular;
-    $("wishCircular").checked = circular;
   }
 
+  /* Une ligne peut porter PLUSIEURS emojis — « Zero Two ✅ ⭐ 🔐 +30% »
+     signifie acquis ET starwish ET lock. L'ancienne version écrasait la
+     variable à chaque tour de boucle : seul le dernier emoji survivait. */
   function extractEmojiTag(name){
-    var tag = null;
+    var tags = [];
     Object.keys(TAG_EMOJI).forEach(function(e){
-      if(name.indexOf(e) !== -1) tag = TAG_EMOJI[e];
+      if(name.indexOf(e) !== -1 && tags.indexOf(TAG_EMOJI[e]) === -1){
+        tags.push(TAG_EMOJI[e]);
+      }
     });
+    var priority = name.indexOf(PRIORITY_EMOJI) !== -1;
+
     var cleaned = name;
     Object.keys(TAG_EMOJI).forEach(function(e){
       cleaned = cleaned.split(e).join("");
     });
+    cleaned = cleaned.split(PRIORITY_EMOJI).join("");
     cleaned = cleaned.replace(/\s{2,}/g, " ").trim();
-    return { name: cleaned, tag: tag };
+
+    // « acquis » et « à retirer » s'excluent : on garde le premier rencontré
+    if(tags.indexOf("owned") !== -1 && tags.indexOf("remove") !== -1){
+      tags = tags.filter(function(t){ return t !== "remove"; });
+    }
+    return { name: cleaned, tags: tags, priority: priority };
   }
 
   function cmd(name){ return "$" + name; }
@@ -199,7 +225,8 @@ var WishFormator = (function(){
       entries: raw
         .map(function(e){
           var tagged = extractEmojiTag(cleanName(e.name));
-          return { name: tagged.name, received: e.received, tag: tagged.tag };
+          return { name: tagged.name, received: e.received,
+                   tags: tagged.tags, priority: tagged.priority };
         })
         .filter(function(e){ return e.name.length > 0; }),
       multiline: multiline
@@ -212,7 +239,7 @@ var WishFormator = (function(){
 
   function recomputeReceived(){
     var active = activeEntries();
-    var got = Adjacency.computeReceived(active.map(function(e){ return e.give; }), circular);
+    var got = Adjacency.computeReceived(active.map(function(e){ return e.give; }), CIRCULAR);
     active.forEach(function(e, i){ e.received = got[i]; });
     entries.forEach(function(e){ if(!isActive(e)) e.received = 0; });
   }
@@ -256,29 +283,59 @@ var WishFormator = (function(){
       name.className = "wname";
       name.textContent = entry.name;
 
-      /* Deux groupes distincts : à gauche le STATUT (quelle commande sera
-         générée), à droite les BONUS d'adjacence (donne / reçoit). Mélangés,
-         on ne savait plus lequel pilotait quoi. */
+      /* Badges cliquables directement sur la ligne : toujours les quatre,
+         grisés quand inactifs. Plus de menu à ouvrir, et comme leur nombre
+         est constant la largeur ne bouge jamais d'une ligne à l'autre. */
       var badges = document.createElement("div");
       badges.className = "badges";
 
-      if(entry.priority){
-        var prio = document.createElement("span");
-        prio.className = "badge priority";
-        prio.textContent = "🎯";
-        prio.title = "Prioritaire : l'optimisation place les porteurs de perk autour de lui";
-        prio.setAttribute("aria-label", "Prioritaire");
-        badges.appendChild(prio);
-      }
-
-      entry.tags.forEach(function(t){
-        var badge = document.createElement("span");
-        badge.className = "badge " + TAGS[t].badge;
-        badge.textContent = TAGS[t].emoji;
-        badge.title = TAGS[t].label + " — " + TAGS[t].title;
-        badge.setAttribute("aria-label", TAGS[t].label);
-        badges.appendChild(badge);
+      TOGGLES.forEach(function(t){
+        var on = t.key === "priority" ? !!entry.priority : hasTag(entry, t.key);
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "badge toggle " + t.cls + (on ? " on" : "");
+        btn.textContent = t.emoji;
+        btn.title = t.label + (on ? " — actif, clique pour retirer" : " — clique pour activer");
+        btn.setAttribute("aria-label", t.label);
+        btn.setAttribute("aria-pressed", on ? "true" : "false");
+        btn.addEventListener("click", function(e){
+          e.stopPropagation();   // ne pas déclencher le drag ni la ligne
+          if(t.key === "priority") entry.priority = !entry.priority;
+          else toggleTag(entry, t.key);
+          render();
+        });
+        badges.appendChild(btn);
       });
+
+      // niveau de perk réglable sur la ligne (il fallait ouvrir le menu avant)
+      var lvl = document.createElement("div");
+      lvl.className = "perk-stepper";
+      var minus = document.createElement("button");
+      minus.type = "button";
+      minus.className = "step-btn";
+      minus.textContent = "−";
+      minus.title = "Baisser le niveau de perk";
+      var lvlText = document.createElement("span");
+      lvlText.className = "step-lvl";
+      lvlText.textContent = Adjacency.levelOf(entry.give);
+      var plus = document.createElement("button");
+      plus.type = "button";
+      plus.className = "step-btn";
+      plus.textContent = "+";
+      plus.title = "Monter le niveau de perk";
+      minus.addEventListener("click", function(e){
+        e.stopPropagation();
+        entry.give = Adjacency.giveForLevel(Math.max(0, Adjacency.levelOf(entry.give) - 1));
+        render();
+      });
+      plus.addEventListener("click", function(e){
+        e.stopPropagation();
+        entry.give = Adjacency.giveForLevel(Math.min(10, Adjacency.levelOf(entry.give) + 1));
+        render();
+      });
+      lvl.appendChild(minus);
+      lvl.appendChild(lvlText);
+      lvl.appendChild(plus);
 
       var perks = document.createElement("div");
       perks.className = "badges perk-badges";
@@ -287,8 +344,7 @@ var WishFormator = (function(){
         var giveBadge = document.createElement("span");
         giveBadge.className = "badge give";
         giveBadge.textContent = "donne +" + entry.give + "%";
-        giveBadge.title = "Perk niveau " + Adjacency.levelOf(entry.give) +
-          " : donne +" + entry.give + "% à chacun de ses deux voisins.";
+        giveBadge.title = "Donne +" + entry.give + "% à chacun de ses deux voisins.";
         perks.appendChild(giveBadge);
       }
 
@@ -300,16 +356,26 @@ var WishFormator = (function(){
         perks.appendChild(recvBadge);
       }
 
+      var del = document.createElement("button");
+      del.type = "button";
+      del.className = "wish-del";
+      del.textContent = "×";
+      del.title = "Retirer de la liste";
+      del.addEventListener("click", function(e){
+        e.stopPropagation();
+        entries.splice(index, 1);
+        render();
+      });
+
       item.appendChild(rank);
       item.appendChild(grip);
       item.appendChild(name);
       item.appendChild(badges);
+      item.appendChild(lvl);
       item.appendChild(perks);
+      item.appendChild(del);
 
-      item.addEventListener("click", function(e){
-        if(e.target === grip) return;
-        openTagBubble(index, item);
-      });
+      item.dataset.index = index;
 
       item.addEventListener("dragstart", function(){
         dragIndex = index;
@@ -364,127 +430,6 @@ var WishFormator = (function(){
     $("wishCount").style.color = over ? "var(--red-ink)" : "";
 
     persist();
-  }
-
-  var BUBBLE_TAGS = ["star", "lock", "remove"];
-
-  function closeBubble(){
-    if(!activeBubble) return;
-    activeBubble.cleanup();
-    if(activeBubble.el.parentNode) activeBubble.el.parentNode.removeChild(activeBubble.el);
-    activeBubble = null;
-  }
-
-  function positionBubble(bubble, anchorEl){
-    var rect = anchorEl.getBoundingClientRect();
-    bubble.style.top = (rect.bottom + window.scrollY + 8) + "px";
-    bubble.style.left = (rect.left + window.scrollX) + "px";
-    var maxLeft = window.scrollX + document.documentElement.clientWidth - bubble.offsetWidth - 12;
-    if(rect.left > maxLeft) bubble.style.left = Math.max(12, maxLeft) + "px";
-  }
-
-  function openTagBubble(index, anchorEl){
-    closeBubble();
-    var entry = entries[index];
-
-    var bubble = document.createElement("div");
-    bubble.className = "tag-bubble";
-
-    var tagRow = document.createElement("div");
-    tagRow.className = "tag-bubble-tags";
-    BUBBLE_TAGS.forEach(function(key){
-      var btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "tag-bubble-btn tbb-" + key + (hasTag(entry, key) ? " active" : "");
-      btn.textContent = TAGS[key].emoji;
-      btn.title = TAGS[key].label;
-      btn.setAttribute("aria-label", TAGS[key].label);
-      btn.addEventListener("click", function(){
-        toggleTag(entry, key);
-        render();
-        openTagBubble(index, anchorEl);
-      });
-      tagRow.appendChild(btn);
-    });
-    bubble.appendChild(tagRow);
-
-    // marqueur de priorité : orthogonal aux tags, il ne change aucune
-    // commande générée, il ne sert qu'au calcul de placement
-    var prioBtn = document.createElement("button");
-    prioBtn.type = "button";
-    prioBtn.className = "tag-bubble-btn tbb-priority tag-bubble-wide" +
-      (entry.priority ? " active" : "");
-    prioBtn.textContent = "🎯 " + (entry.priority ? "Prioritaire" : "Marquer prioritaire");
-    prioBtn.title = "Les porteurs de perk seront placés autour de lui";
-    prioBtn.addEventListener("click", function(){
-      entry.priority = !entry.priority;
-      render();
-      openTagBubble(index, anchorEl);
-    });
-    bubble.appendChild(prioBtn);
-
-    var perkRow = document.createElement("div");
-    perkRow.className = "tag-bubble-perk";
-    var minusBtn = document.createElement("button");
-    minusBtn.type = "button";
-    minusBtn.className = "small-btn";
-    minusBtn.textContent = "−";
-    var lvlSpan = document.createElement("span");
-    lvlSpan.className = "tag-bubble-lvl";
-    lvlSpan.textContent = "LVL " + Adjacency.levelOf(entry.give);
-    var plusBtn = document.createElement("button");
-    plusBtn.type = "button";
-    plusBtn.className = "small-btn";
-    plusBtn.textContent = "+";
-
-    minusBtn.addEventListener("click", function(){
-      entry.give = Adjacency.giveForLevel(Math.max(0, Adjacency.levelOf(entry.give) - 1));
-      lvlSpan.textContent = "LVL " + Adjacency.levelOf(entry.give);
-      render();
-    });
-    plusBtn.addEventListener("click", function(){
-      entry.give = Adjacency.giveForLevel(Math.min(10, Adjacency.levelOf(entry.give) + 1));
-      lvlSpan.textContent = "LVL " + Adjacency.levelOf(entry.give);
-      render();
-    });
-
-    perkRow.appendChild(minusBtn);
-    perkRow.appendChild(lvlSpan);
-    perkRow.appendChild(plusBtn);
-    bubble.appendChild(perkRow);
-
-    var deleteBtn = document.createElement("button");
-    deleteBtn.type = "button";
-    deleteBtn.className = "small-btn tag-bubble-delete";
-    deleteBtn.textContent = "Supprimer";
-    deleteBtn.addEventListener("click", function(){
-      entries.splice(index, 1);
-      closeBubble();
-      render();
-    });
-    bubble.appendChild(deleteBtn);
-
-    document.body.appendChild(bubble);
-    positionBubble(bubble, anchorEl);
-
-    function onOutside(e){
-      if(bubble.contains(e.target) || e.target === anchorEl || anchorEl.contains(e.target)) return;
-      closeBubble();
-    }
-    function onKey(e){ if(e.key === "Escape") closeBubble(); }
-
-    setTimeout(function(){
-      document.addEventListener("click", onOutside);
-      document.addEventListener("keydown", onKey);
-    }, 0);
-
-    activeBubble = {
-      el: bubble,
-      cleanup: function(){
-        document.removeEventListener("click", onOutside);
-        document.removeEventListener("keydown", onKey);
-      }
-    };
   }
 
   function withTag(tag){
@@ -553,20 +498,19 @@ var WishFormator = (function(){
     if(!parsed.length) return null;
 
     var result = Adjacency.infer(parsed.map(function(p){ return p.received; }));
-    circular = result.circular;
-    $("wishCircular").checked = circular;
 
     entries = parsed.map(function(p, i){
-      return { name: p.name, tags: [p.tag || "wish"], give: result.gives[i], received: p.received };
+      return {
+        name: p.name,
+        tags: (p.tags && p.tags.length) ? p.tags.slice() : ["wish"],
+        priority: !!p.priority,
+        give: result.gives[i],
+        received: p.received
+      };
     });
 
     result.multiline = parsedResult.multiline;
     return result;
-  }
-
-  function setAll(tag){
-    entries.forEach(function(e){ e.tags = [tag]; });
-    render();
   }
 
   function addToAll(tag){
@@ -622,9 +566,7 @@ var WishFormator = (function(){
           "Colle un personnage par ligne pour un résultat fiable. ";
       }
       if(result.ok){
-        msg += "Bonus résolus exactement en mode " +
-          (result.circular ? "circulaire" : "linéaire") + " : " +
-          carriers + " porteur(s) identifié(s).";
+        msg += "Bonus résolus exactement : " + carriers + " porteur(s) identifié(s).";
         Utils.setStatus($("wishStatus"), msg, result.multiline ? "ok" : "warn");
       } else {
         msg += "Résolution approchée (écart de " + result.totalError +
@@ -637,9 +579,22 @@ var WishFormator = (function(){
       render();
     });
 
-    $("wishAllWish").addEventListener("click", function(){ setAll("wish"); });
     $("wishAllLock").addEventListener("click", function(){ addToAll("lock"); });
-    $("wishAllStar").addEventListener("click", function(){ addToAll("star"); });
+
+    /* Le starwish s'attribue personnage par personnage (clic sur la carte).
+       Un « tout en star » n'aurait aucun sens ; ce bouton fait l'inverse :
+       il libère l'étoile pour la redonner à qui on veut. */
+    $("wishClearStar").addEventListener("click", function(){
+      var cleared = 0;
+      entries.forEach(function(e){
+        if(hasTag(e, "star")){ toggleTag(e, "star"); cleared++; }
+      });
+      render();
+      Utils.setStatus($("wishStatus"),
+        cleared ? cleared + " ⭐ retiré(s). Clique une carte pour l'attribuer à qui tu veux."
+                : "Aucun ⭐ à retirer.", cleared ? "ok" : "warn");
+    });
+
     $("wishReverse").addEventListener("click", function(){
       entries.reverse();
       render();
@@ -656,8 +611,8 @@ var WishFormator = (function(){
       var prioCount = active.filter(function(e){ return e.priority; }).length;
       if(!prioCount){
         Utils.setStatus(status,
-          "Aucun personnage prioritaire. Clique une carte puis « 🎯 Marquer prioritaire » " +
-          "pour désigner ceux que tu veux voir spawn en premier.", "warn");
+          "Aucun personnage prioritaire : clique le badge 🎯 sur les lignes que " +
+          "tu veux voir spawn en premier.", "warn");
         return;
       }
       var carriers = active.filter(function(e){ return e.give > 0; }).length;
@@ -667,26 +622,21 @@ var WishFormator = (function(){
         return;
       }
 
-      var before = priorityScore(active);
+      var beforePrio = priorityScore(active);
       var arranged = optimizeOrder(active);
-      var after = priorityScore(arranged);
+      var afterPrio = priorityScore(arranged);
 
       // les personnages hors wishlist (acquis / à retirer) restent à la fin
       entries = arranged.concat(entries.filter(function(e){ return !isActive(e); }));
       render();
 
-      var gain = after - before;
+      var gain = afterPrio - beforePrio;
       Utils.setStatus(status,
         gain > 0
-          ? "Tes " + prioCount + " prioritaire(s) reçoivent maintenant +" + after +
-            "% au total, contre +" + before + "% avant (soit +" + gain + " points)."
-          : "Ton ordre était déjà optimal : +" + after + "% pour tes prioritaires.",
+          ? "Tes " + prioCount + " prioritaire(s) reçoivent maintenant +" + afterPrio +
+            "% au total, contre +" + beforePrio + "% avant (soit +" + gain + " points)."
+          : "Ton ordre était déjà optimal : +" + afterPrio + "% pour tes prioritaires.",
         "ok");
-    });
-
-    $("wishCircular").addEventListener("change", function(){
-      circular = this.checked;
-      render();
     });
 
     $("wishSlotLimit").addEventListener("input", render);

@@ -1300,27 +1300,124 @@ textarea{min-height:96px;}
    WISH FORMATOR — priorité et séparation statut / bonus
    ============================================================ */
 
+/* Les quatre bascules sont toujours présentes : le bloc a donc une largeur
+   constante et aucune ligne ne se décale par rapport aux autres.
+   Le :not() est nécessaire — la colonne des bonus porte aussi la classe
+   .badges, et ce sélecteur (0,2,0) battait sinon .perk-badges (0,1,0). */
+.wish-item .badges:not(.perk-badges){
+  flex-direction:row;
+  align-items:center;
+  gap:3px;
+  flex:none;
+}
+.badge.toggle{
+  padding:0;
+  width:26px;
+  height:26px;
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:13px;
+  line-height:1;
+  cursor:pointer;
+  border:1px solid var(--border-subtle);
+  background:transparent;
+  /* inactif : grisé et en retrait, pour que l'actif saute aux yeux */
+  filter:grayscale(1);
+  opacity:.35;
+  transition:opacity var(--d-fast) var(--ease-out),
+             filter var(--d-fast) var(--ease-out),
+             border-color var(--d-fast) var(--ease-out),
+             transform var(--d-fast) var(--ease-out);
+}
+.badge.toggle:hover{opacity:.75;transform:scale(1.1);}
+.badge.toggle.on{
+  filter:none;
+  opacity:1;
+}
+.badge.toggle.tg-priority.on{border-color:var(--orange);background:rgba(255,157,77,.16);}
+.badge.toggle.tg-star.on    {border-color:var(--pink);  background:rgba(255,127,209,.16);}
+.badge.toggle.tg-lock.on    {border-color:var(--yellow);background:rgba(246,217,107,.16);}
+.badge.toggle.tg-owned.on   {border-color:var(--green); background:rgba(76,175,98,.16);}
+.badge.toggle.tg-remove.on  {border-color:var(--red);   background:rgba(255,107,128,.16);}
+
+/* la ligne est grisée quand acquise : ses badges doivent rester lisibles */
+.wish-item.tag-owned .badge.toggle.on{opacity:1;}
+
+/* Niveau de perk réglable sur la ligne : plus besoin d'ouvrir un menu */
+.perk-stepper{
+  display:flex;
+  align-items:center;
+  gap:2px;
+  flex:none;
+}
+.step-btn{
+  width:20px;height:20px;
+  min-height:auto;
+  padding:0;
+  border-radius:var(--r-sm);
+  font-size:13px;
+  line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-dim);
+}
+.step-btn:hover{color:var(--fg);}
+.step-lvl{
+  font-family:var(--font-mono);
+  font-size:var(--t-xs);
+  font-variant-numeric:tabular-nums;
+  min-width:14px;
+  text-align:center;
+  color:var(--text-dim);
+}
+.wish-del{
+  flex:none;
+  width:22px;height:22px;
+  min-height:auto;
+  padding:0;
+  border:none;
+  background:transparent;
+  color:var(--text-dim);
+  font-size:15px;
+  line-height:1;
+  border-radius:50%;
+  opacity:.5;
+}
+.wish-del:hover{opacity:1;color:var(--red-ink);background:rgba(var(--fg-rgb),.07);}
+
 /* Les bonus d'adjacence sont poussés à droite, à l'écart des badges de
-   statut : on distingue d'un coup d'œil « quelle commande » de
-   « combien il donne et reçoit ». */
-.perk-badges{
+   statut. Largeur FIXE : sans ça, une ligne « donne +105% reçoit +120% »
+   décalait le nom de toutes les autres lignes. */
+.wish-item .perk-badges{
   margin-left:auto;
   padding-left:var(--s-3);
   border-left:1px solid var(--border-subtle);
   flex:none;
+  width:104px;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:3px;
 }
 .badge.give,.badge.fw{
   font-family:var(--font-mono);
+  font-size:var(--t-2xs, 10px);
   font-variant-numeric:tabular-nums;
+  white-space:nowrap;
 }
 .badge.priority{
   border-color:var(--orange);
   background:rgba(255,157,77,.14);
 }
 
-/* Ligne d'un prioritaire : liseré gauche marqué */
+/* Ligne d'un prioritaire : liseré gauche marqué.
+   Ombre interne et non border-left : élargir la bordure décalait le
+   contenu de 2 px et cassait l'alignement des noms avec les autres lignes. */
 .wish-item:has(.badge.priority){
-  border-left:3px solid var(--orange);
+  box-shadow:inset 3px 0 0 var(--orange);
+}
+.wish-item:has(.badge.priority):hover{
+  box-shadow:inset 3px 0 0 var(--orange), var(--e-2);
 }
 
 .tag-bubble-wide{
@@ -1334,11 +1431,10 @@ textarea{min-height:96px;}
 }
 
 @media (max-width:640px){
-  .perk-badges{
-    margin-left:0;
-    padding-left:0;
-    border-left:none;
-    width:100%;
+  .wish-item .perk-badges{
+    padding-left:var(--s-2);
+    width:auto;
+    min-width:86px;
   }
 }
 

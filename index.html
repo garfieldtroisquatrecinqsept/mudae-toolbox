@@ -414,7 +414,6 @@
         <textarea id="wishInput" placeholder="Reze  +45% C.C.  +45% Asa Mitaka  +45% Lelouch  +105% Zero Two  Lab Member No. 004  +105% Yoru  Levi +30% Garfield"></textarea>
         <div class="radio-row">
           <label><input type="checkbox" id="wishDedupe" checked> Supprimer les doublons</label>
-          <label><input type="checkbox" id="wishCircular" checked> Wishlist circulaire (le dernier touche le premier)</label>
         </div>
         <div class="btn-row">
           <button class="btn-primary" id="wishBuildBtn">Importer et déduire les perks</button>
@@ -426,15 +425,20 @@
         <div class="grid-2 grid-start">
         <div class="card">
           <h2><span class="num">2</span>Organiser</h2>
-          <p class="hint">Clique une carte pour la marquer 🎯 <b>prioritaire</b>, changer son statut ou son niveau de perk. Puis lance l'optimisation : les porteurs de perk viennent se placer autour de tes prioritaires.</p>
+          <p class="hint">Clique directement les badges d'une ligne : 🎯 prioritaire, ⭐ starwish, 🔐 lock, 🗑️ à retirer. Gris = inactif.</p>
           <div class="btn-row">
             <button class="btn-primary" id="wishOptimize">🎯 Optimiser pour mes prioritaires</button>
           </div>
           <div class="status" id="wishOptimizeStatus"></div>
+          <div class="info-box">
+            <b>Concentre, n'étale pas.</b> Le bonus total est figé : ta chance d'avoir <i>un</i> wish
+            ne dépend pas de l'ordre. Ce qui change, c'est <b>qui</b> en profite — concentrer le bonus
+            sur 1 ou 2 personnages les rend jusqu'à <b>3,3×</b> plus probables que si tu l'étales sur
+            toute la liste. En revanche, entre tes prioritaires, la répartition n'a aucune importance.
+          </div>
           <div class="btn-row">
-            <button class="small-btn" id="wishAllWish">Tout en souhait</button>
             <button class="small-btn" id="wishAllLock">Tout verrouiller</button>
-            <button class="small-btn" id="wishAllStar">Tout en star</button>
+            <button class="small-btn" id="wishClearStar">Retirer tous les ⭐</button>
             <button class="small-btn" id="wishReverse">Inverser</button>
             <button class="small-btn" id="wishVersionsBtn" type="button">Versions</button>
           </div>
@@ -450,6 +454,7 @@
           <div class="wish-list" id="wishList" aria-live="polite"></div>
         </div>
 
+        <div>
         <div class="card">
           <h2><span class="num">3</span>Générer</h2>
           <label>Commande pour le tag 🔐 Lock</label>
@@ -461,18 +466,19 @@
             <button class="btn-primary" id="wishGenerateBtn">Générer les commandes</button>
           </div>
         </div>
-        </div>
-      </div>
 
-      <div class="card" id="wishScriptCard" style="display:none;">
-        <h2>Bloc de commandes</h2>
-        <div class="output-box" id="wishScript"></div>
-        <div class="btn-row">
-          <button class="small-btn" id="wishScriptCopyBtn">Tout copier</button>
-          <button class="small-btn" id="wishScriptCopyCleanBtn">Copier sans les commentaires</button>
+        <!-- dans la colonne de droite, juste sous le bouton qui le remplit :
+             tout en bas de page il fallait scrooler pour le voir apparaitre -->
+        <div class="card" id="wishScriptCard" style="display:none;">
+          <h2>Bloc de commandes</h2>
+          <div class="output-box" id="wishScript"></div>
+          <div class="btn-row">
+            <button class="small-btn" id="wishScriptCopyBtn">Tout copier</button>
+            <button class="small-btn" id="wishScriptCopyCleanBtn">Sans les commentaires</button>
+          </div>
+          <p class="hint">Envoie d'abord les ajouts, puis le <code>$wishi</code> qui reproduit ton ordre. Les lignes <code>#</code> sont des repères, le second bouton les retire.</p>
         </div>
-        <div class="info-box">
-          Le <code>$wishi</code> reproduit ton ordre exact en une seule commande. Envoie d'abord les ajouts, puis ce <code>$wishi</code>. Les lignes <code>#</code> sont des repères pour toi ; le second bouton les retire automatiquement.
+        </div>
         </div>
       </div>
     </section>
