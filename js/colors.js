@@ -301,29 +301,69 @@ var ColorPicker = (function(){
     };
   }
 
+  function showExtracted(target, colors){
+    target.extracted = colors;
+    var box = target.extractedBox;
+    box.innerHTML = "";
+    colors.forEach(function(c){
+      var dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "preset-dot";
+      dot.style.background = c.hex;
+      dot.title = c.hex + " (extrait de l'image)";
+      dot.addEventListener("click", function(){ setColor(target, c.hex); });
+      box.appendChild(dot);
+    });
+    if(colors.length) setColor(target, colors[0].hex);
+  }
+
+  /* Trois échecs très différents étaient tous rapportés comme « lien mort » :
+     l'image qui ne charge pas, le serveur qui interdit la lecture des pixels,
+     et une erreur d'extraction survenue APRÈS un chargement réussi (le .catch
+     englobait le .then). On les distingue pour dire quoi faire. */
+  function extractionFailed(target, reason, level){
+    Utils.setStatus($("colorStatus"), reason, level || "warn");
+  }
+
+  function diagnose(target){
+    // le chargement sans crossOrigin réussit-il ? si oui, l'image existe et
+    // c'est bien la lecture des pixels qui est refusée
+    return Utils.loadImage(target.url, false).then(function(){
+      extractionFailed(target,
+        "L'image de " + target.name + " s'affiche mais son serveur interdit d'en lire " +
+        "les pixels. Choisis la couleur avec le bouton Roue.", "warn");
+    }).catch(function(){
+      extractionFailed(target,
+        "Image introuvable pour " + target.name + " : lien mort, hors ligne, " +
+        "ou requête bloquée par une extension du navigateur.", "error");
+    });
+  }
+
   function extractFor(target){
     if(!target.url){
       Utils.setStatus($("colorStatus"),
         target.name + " n'a pas de lien d'image dans la liste collée.", "warn");
       return;
     }
-    Utils.loadImage(target.url, true).then(function(img){
-      var colors = Utils.extractColors(img, 5);
-      target.extracted = colors;
-      var box = target.extractedBox;
-      box.innerHTML = "";
-      colors.forEach(function(c){
-        var dot = document.createElement("button");
-        dot.className = "preset-dot";
-        dot.style.background = c.hex;
-        dot.title = c.hex + " (extrait de l'image)";
-        dot.addEventListener("click", function(){ setColor(target, c.hex); });
-        box.appendChild(dot);
-      });
-      if(colors.length) setColor(target, colors[0].hex);
+    return Utils.loadImage(target.url, true).then(function(img){
+      var colors;
+      try {
+        colors = Utils.extractColors(img, 5);
+      } catch(err){
+        // image chargée mais canvas « teinté » : lecture des pixels refusée
+        extractionFailed(target,
+          "Les pixels de l'image de " + target.name + " ne sont pas lisibles " +
+          "(" + err.name + "). Utilise le bouton Roue.", "warn");
+        return;
+      }
+      if(!colors.length){
+        extractionFailed(target,
+          "Aucune couleur exploitable trouvée dans l'image de " + target.name + ".", "warn");
+        return;
+      }
+      showExtracted(target, colors);
     }).catch(function(){
-      Utils.setStatus($("colorStatus"),
-        "Image inaccessible pour " + target.name + " (CORS ou lien mort).", "warn");
+      return diagnose(target);
     });
   }
 
@@ -339,6 +379,8 @@ var ColorPicker = (function(){
       if(target.url){
         var img = document.createElement("img");
         img.className = "harem-avatar skeleton";
+        // sans ça, l'anti-hotlink de mudae.net renvoie 403 (voir loadImage)
+        img.referrerPolicy = "no-referrer";
         img.alt = target.name;
         img.loading = "lazy";
         img.addEventListener("load", function(){ img.classList.remove("skeleton"); });
@@ -460,30 +502,39 @@ var ColorPicker = (function(){
       targets.forEach(function(t){ setColor(t, hex); });
     });
 
+    /* L'ancienne version avalait chaque échec en silence (.catch vide) puis
+       annonçait « Extraction terminée » même si rien n'avait fonctionné. */
     $("colorExtractAll").addEventListener("click", function(){
+      var withUrl = targets.filter(function(t){ return t.url; });
+      if(!withUrl.length){
+        Utils.setStatus($("colorStatus"),
+          "Aucun personnage n'a de lien d'image dans la liste collée.", "warn");
+        return;
+      }
+
+      Utils.setStatus($("colorStatus"),
+        "Extraction en cours sur " + withUrl.length + " image(s)…", "");
+
+      var done = 0, failed = 0;
       var chain = Promise.resolve();
-      targets.forEach(function(t){
-        if(!t.url) return;
+      withUrl.forEach(function(t){
         chain = chain.then(function(){
           return Utils.loadImage(t.url, true).then(function(img){
-            var colors = Utils.extractColors(img, 5);
-            t.extracted = colors;
-            var box = t.extractedBox;
-            box.innerHTML = "";
-            colors.forEach(function(c){
-              var dot = document.createElement("button");
-              dot.className = "preset-dot";
-              dot.style.background = c.hex;
-              dot.title = c.hex;
-              dot.addEventListener("click", function(){ setColor(t, c.hex); });
-              box.appendChild(dot);
-            });
-            if(colors.length) setColor(t, colors[0].hex);
-          }).catch(function(){});
+            var colors = Utils.extractColors(img, 5);   // peut lever si teinté
+            if(!colors.length) throw new Error("aucune couleur");
+            showExtracted(t, colors);
+            done++;
+          }).catch(function(){ failed++; });
         });
       });
+
       chain.then(function(){
-        Utils.setStatus($("colorStatus"), "Extraction terminée.", "ok");
+        var msg = done + " image(s) sur " + withUrl.length + " exploitée(s).";
+        if(failed){
+          msg += " " + failed + " en échec : serveur qui refuse la lecture des " +
+                 "pixels, ou lien mort. Passe par le bouton Roue pour celles-là.";
+        }
+        Utils.setStatus($("colorStatus"), msg, failed ? (done ? "warn" : "error") : "ok");
       });
     });
 
