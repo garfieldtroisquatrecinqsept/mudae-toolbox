@@ -101,16 +101,12 @@ var Adjacency = (function(){
     return out;
   }
 
+  /* La wishlist Mudae est toujours circulaire : le dernier touche le
+     premier. On ne teste donc plus le modèle linéaire — il pouvait être
+     retenu quand il collait mieux aux nombres, et produisait alors des
+     niveaux de perk faux, puisque ce n'est pas ainsi que le jeu calcule. */
   function infer(received){
-    var circularTry = attempt(received, true);
-    var linearTry = attempt(received, false);
-
-    if(circularTry.ok && !linearTry.ok) return circularTry;
-    if(linearTry.ok && !circularTry.ok) return linearTry;
-    if(circularTry.ok && linearTry.ok){
-      return circularTry.totalError <= linearTry.totalError ? circularTry : linearTry;
-    }
-    return circularTry.totalError <= linearTry.totalError ? circularTry : linearTry;
+    return attempt(received, true);
   }
 
   function levelOf(give){
