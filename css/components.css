@@ -1248,6 +1248,54 @@ textarea{min-height:96px;}
   .empty-icon{animation:none;}
 }
 
+/* ============================================================
+   APERÇU AU SURVOL — la carte en grand, sans habillage
+   ============================================================ */
+.card-preview{
+  position:absolute;
+  z-index:300;
+  width:190px;
+  padding:6px;
+  border-radius:var(--r-lg);
+  background:var(--surface);
+  /* 2px : la bordure porte la couleur choisie pour le personnage,
+     elle doit se lire d'un coup d'œil (posée par colors.js) */
+  border:2px solid var(--border);
+  box-shadow:var(--e-4);
+  transition:opacity var(--d-fast) var(--ease-out),
+             transform var(--d-fast) var(--ease-spring),
+             visibility var(--d-fast),
+             border-color var(--d-fast) var(--ease-out),
+             box-shadow var(--d-fast) var(--ease-out);
+  opacity:0;
+  visibility:hidden;
+  transform:scale(.96);
+  transform-origin:center;
+  pointer-events:none;   /* ne doit jamais voler le survol à l'avatar */
+}
+.card-preview.is-visible{
+  opacity:1;
+  visibility:visible;
+  transform:scale(1);
+}
+.card-preview img{
+  display:block;
+  width:100%;
+  /* ratio natif des cartes Mudae */
+  aspect-ratio:225 / 350;
+  object-fit:cover;
+  border-radius:var(--r-md);
+  background:var(--surface2);
+}
+@media (prefers-reduced-motion: reduce){
+  .card-preview{transition:opacity .12s linear, visibility .12s;transform:none;}
+  .card-preview.is-visible{transform:none;}
+}
+/* sur écran tactile le survol n'existe pas : inutile d'afficher quoi que ce soit */
+@media (hover: none){
+  .card-preview{display:none;}
+}
+
 /* ---- Responsive ---- */
 @media (max-width:640px){
   .app{padding:0 var(--s-4) var(--s-12);}

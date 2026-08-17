@@ -139,6 +139,7 @@ var ColorPicker = (function(){
     target.color = hex.toUpperCase();
     if(target.input) target.input.value = target.color;
     applyRowColor(target);
+    refreshPreview(target);   // repeint l'aperçu s'il est ouvert sur ce perso
     updateOutput();
   }
 
@@ -367,8 +368,79 @@ var ColorPicker = (function(){
     });
   }
 
+  /* ---- Aperçu au survol ----
+     Un seul élément flottant réutilisé pour toute la liste : les lignes
+     sont reconstruites à chaque rendu, un aperçu par ligne fuirait. */
+  var previewEl = null;
+
+  function ensurePreview(){
+    if(previewEl) return previewEl;
+    previewEl = document.createElement("div");
+    previewEl.className = "card-preview";
+    previewEl.innerHTML = '<img alt="" referrerpolicy="no-referrer">';
+    document.body.appendChild(previewEl);
+    return previewEl;
+  }
+
+  // personnage actuellement survolé : permet de repeindre l'aperçu en
+  // direct quand on change la couleur sans quitter l'avatar
+  var previewTarget = null;
+
+  function paintPreview(target){
+    if(!previewEl) return;
+    if(target && target.color){
+      previewEl.style.borderColor = target.color;
+      previewEl.style.boxShadow = "var(--e-4), 0 0 0 1px " + target.color +
+        ", 0 0 22px " + target.color + "55";
+    } else {
+      previewEl.style.borderColor = "";
+      previewEl.style.boxShadow = "";
+    }
+  }
+
+  function showPreview(target, anchor){
+    var el = ensurePreview();
+    var img = el.querySelector("img");
+    if(img.getAttribute("src") !== target.url) img.setAttribute("src", target.url);
+
+    previewTarget = target;
+    paintPreview(target);
+    el.classList.add("is-visible");
+
+    var rect = anchor.getBoundingClientRect();
+    var w = 190, h = 296, gap = 14;
+    // à droite de l'avatar si la place le permet, sinon à gauche
+    var left = rect.right + gap;
+    if(left + w > document.documentElement.clientWidth - 8){
+      left = rect.left - w - gap;
+    }
+    left = Math.max(8, left);
+    // centré verticalement sur l'avatar, sans sortir de l'écran
+    var top = rect.top + rect.height / 2 - h / 2;
+    top = Math.max(8, Math.min(top, document.documentElement.clientHeight - h - 8));
+
+    el.style.left = (left + window.scrollX) + "px";
+    el.style.top = (top + window.scrollY) + "px";
+  }
+
+  function hidePreview(){
+    previewTarget = null;
+    if(previewEl) previewEl.classList.remove("is-visible");
+  }
+
+  function refreshPreview(target){
+    if(previewTarget && previewTarget === target) paintPreview(target);
+  }
+
+  function attachPreview(el, target){
+    if(!target.url) return;
+    el.addEventListener("pointerenter", function(){ showPreview(target, el); });
+    el.addEventListener("pointerleave", hidePreview);
+  }
+
   function render(){
     var list = $("colorList");
+    hidePreview();
     list.innerHTML = "";
 
     targets.forEach(function(target){
@@ -385,12 +457,15 @@ var ColorPicker = (function(){
         img.loading = "lazy";
         img.addEventListener("load", function(){ img.classList.remove("skeleton"); });
         img.addEventListener("error", function(){
+          // l'image ne charge pas : pas d'aperçu à proposer non plus
+          hidePreview();
           var fb = makeFallbackAvatar(target);
           target.avatarFallbackEl = fb;
           styleFallbackAvatar(target);
           if(img.parentNode) img.parentNode.replaceChild(fb, img);
         });
         img.src = target.url;
+        attachPreview(img, target);
         avatarEl = img;
       } else {
         avatarEl = makeFallbackAvatar(target);
@@ -542,6 +617,7 @@ var ColorPicker = (function(){
       targets.forEach(function(t){
         t.color = null;
         applyRowColor(t);
+        refreshPreview(t);   // sinon l'aperçu ouvert garderait l'ancienne bordure
       });
       updateOutput();
     });
