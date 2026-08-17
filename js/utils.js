@@ -32,9 +32,16 @@ var Utils = (function(){
     }, "image/png");
   }
 
+  /* mudae.net est derrière une protection anti-hotlink Cloudflare : la
+     simple présence de l'en-tête Referer suffit à faire renvoyer un 403,
+     alors que la même requête sans Referer passe (et renvoie bien
+     Access-Control-Allow-Origin). Le navigateur envoie ce Referer
+     automatiquement, d'où des images « mortes » qui ne le sont pas.
+     referrerPolicy="no-referrer" le supprime et débloque le chargement. */
   function loadImage(src, crossOrigin){
     return new Promise(function(resolve, reject){
       var img = new Image();
+      img.referrerPolicy = "no-referrer";
       if(crossOrigin) img.crossOrigin = "anonymous";
       img.onload = function(){ resolve(img); };
       img.onerror = function(){ reject(new Error("échec du chargement")); };
