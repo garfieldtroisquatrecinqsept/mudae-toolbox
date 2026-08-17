@@ -425,14 +425,17 @@
       <div id="wishWorkspace" style="display:none;">
         <div class="grid-2 grid-start">
         <div class="card">
-          <h2><span class="num">2</span>Organiser et taguer</h2>
-          <p class="hint">Glisse pour réordonner (recalcul en direct). Clique une carte pour son statut et son niveau de perk.</p>
+          <h2><span class="num">2</span>Organiser</h2>
+          <p class="hint">Clique une carte pour la marquer 🎯 <b>prioritaire</b>, changer son statut ou son niveau de perk. Puis lance l'optimisation : les porteurs de perk viennent se placer autour de tes prioritaires.</p>
+          <div class="btn-row">
+            <button class="btn-primary" id="wishOptimize">🎯 Optimiser pour mes prioritaires</button>
+          </div>
+          <div class="status" id="wishOptimizeStatus"></div>
           <div class="btn-row">
             <button class="small-btn" id="wishAllWish">Tout en souhait</button>
             <button class="small-btn" id="wishAllLock">Tout verrouiller</button>
             <button class="small-btn" id="wishAllStar">Tout en star</button>
             <button class="small-btn" id="wishReverse">Inverser</button>
-            <button class="small-btn" id="wishGroupCarriers">Répartir les porteurs</button>
             <button class="small-btn" id="wishVersionsBtn" type="button">Versions</button>
           </div>
           <label>Limite de slots de wishlist (0 = pas de limite)</label>
@@ -447,29 +450,16 @@
           <div class="wish-list" id="wishList" aria-live="polite"></div>
         </div>
 
-        <div>
         <div class="card">
-          <h2><span class="num">3</span>Bilan des bonus d'adjacence</h2>
-          <div class="stat-grid" id="wishAdjSummary"></div>
-          <div class="info-box">
-            <b>Le total ne bouge pas.</b> Chaque porteur donne son bonus à ses 2 voisins : la somme distribuée = 2× la somme des perks, quel que soit l'ordre. Réorganiser ne crée pas de bonus, ça décide <b>qui</b> le reçoit — place tes porteurs autour des personnages que tu veux vraiment voir spawn.
-          </div>
-        </div>
-
-        <div class="card">
-          <h2><span class="num">4</span>Générer le script</h2>
-          <label>Commande à utiliser pour le tag « Lock »</label>
+          <h2><span class="num">3</span>Générer</h2>
+          <label>Commande pour le tag 🔐 Lock</label>
           <select id="lockCommand">
-            <option value="wishl" selected>$wishl (commande réelle, protège de $wishpurge)</option>
-            <option value="wishlock">$wishlock (comme demandé, non documentée)</option>
+            <option value="wishl" selected>$wishl — protège de $wishpurge</option>
+            <option value="wishlock">$wishlock</option>
           </select>
-          <div class="warn-box">
-            <b>$wishlock n'est pas une commande Mudae documentée</b> (absente du wiki officiel). La commande réelle qui protège de <code>$wishpurge</code> est <code>$wishl</code> — teste <code>$wishlock</code> en jeu avant de t'y fier.
-          </div>
           <div class="btn-row">
             <button class="btn-primary" id="wishGenerateBtn">Générer les commandes</button>
           </div>
-        </div>
         </div>
         </div>
       </div>

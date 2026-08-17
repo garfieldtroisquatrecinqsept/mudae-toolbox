@@ -1296,6 +1296,52 @@ textarea{min-height:96px;}
   .card-preview{display:none;}
 }
 
+/* ============================================================
+   WISH FORMATOR — priorité et séparation statut / bonus
+   ============================================================ */
+
+/* Les bonus d'adjacence sont poussés à droite, à l'écart des badges de
+   statut : on distingue d'un coup d'œil « quelle commande » de
+   « combien il donne et reçoit ». */
+.perk-badges{
+  margin-left:auto;
+  padding-left:var(--s-3);
+  border-left:1px solid var(--border-subtle);
+  flex:none;
+}
+.badge.give,.badge.fw{
+  font-family:var(--font-mono);
+  font-variant-numeric:tabular-nums;
+}
+.badge.priority{
+  border-color:var(--orange);
+  background:rgba(255,157,77,.14);
+}
+
+/* Ligne d'un prioritaire : liseré gauche marqué */
+.wish-item:has(.badge.priority){
+  border-left:3px solid var(--orange);
+}
+
+.tag-bubble-wide{
+  width:100%;
+  margin-bottom:var(--s-2);
+}
+.tag-bubble-btn.tbb-priority.active{
+  background:rgba(255,157,77,.16);
+  border-color:var(--orange);
+  color:var(--orange-ink);
+}
+
+@media (max-width:640px){
+  .perk-badges{
+    margin-left:0;
+    padding-left:0;
+    border-left:none;
+    width:100%;
+  }
+}
+
 /* ---- Responsive ---- */
 @media (max-width:640px){
   .app{padding:0 var(--s-4) var(--s-12);}
