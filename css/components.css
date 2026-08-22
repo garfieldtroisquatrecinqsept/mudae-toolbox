@@ -1342,8 +1342,30 @@ textarea{min-height:96px;}
 .badge.toggle.tg-owned.on   {border-color:var(--green); background:rgba(76,175,98,.16);}
 .badge.toggle.tg-remove.on  {border-color:var(--red);   background:rgba(255,107,128,.16);}
 
-/* la ligne est grisée quand acquise : ses badges doivent rester lisibles */
-.wish-item.tag-owned .badge.toggle.on{opacity:1;}
+/* Un personnage acquis reste dans la wishlist pour être re-drop : il ne
+   doit donc plus être grisé ni barré comme s'il en était exclu. Un simple
+   liseré vert le signale, sans nuire à la lecture. */
+.wish-item.tag-owned{
+  opacity:1;
+  box-shadow:inset 3px 0 0 var(--green);
+}
+.wish-item.tag-owned:hover{
+  box-shadow:inset 3px 0 0 var(--green), var(--e-2);
+}
+.wish-item.tag-owned .wname{text-decoration:none;}
+
+/* Noms complets : ils étaient coupés par une ellipse. On autorise deux
+   lignes, la hauteur de rangée le permet largement. */
+.wish-item .wname{
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+  line-height:1.25;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow-wrap:anywhere;
+}
 
 /* Niveau de perk réglable sur la ligne : plus besoin d'ouvrir un menu */
 .perk-stepper{
@@ -1445,7 +1467,11 @@ textarea{min-height:96px;}
   .card{padding:var(--s-4);}
   .tab-btn{padding:var(--s-2) var(--s-3);font-size:var(--t-xs);}
   .brand{font-size:var(--t-lg);}
-  .wish-item{flex-wrap:wrap;}
-  .wish-item .badges{width:100%;padding-left:calc(26px + var(--s-3));}
+  /* Les cinq bascules tiennent sur 375 px : inutile de les renvoyer sur
+     une ligne entière, ça faisait des rangées de 250 px de haut. */
+  .wish-item{flex-wrap:wrap;gap:var(--s-2);}
+  .wish-item .wname{flex:1 1 100%;order:-1;padding-left:calc(26px + var(--s-2));}
+  .wish-item .badges:not(.perk-badges){gap:4px;}
+  .wish-item .perk-badges{border-left:none;padding-left:0;min-width:0;}
   .stat-grid{grid-template-columns:repeat(auto-fit,minmax(130px,1fr));}
 }
