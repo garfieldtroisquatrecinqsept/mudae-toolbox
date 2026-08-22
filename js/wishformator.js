@@ -163,9 +163,10 @@ var WishFormator = (function(){
     if(i !== -1){
       entry.tags.splice(i, 1);
     } else {
+      /* On ne retire les tags exclusifs QUE si on en ajoute un autre.
+         Les deux branches étaient identiques : ajouter ⭐ ou 🔐 effaçait
+         donc le ✅ posé juste avant. */
       if(EXCLUSIVE.indexOf(tag) !== -1){
-        entry.tags = entry.tags.filter(function(t){ return EXCLUSIVE.indexOf(t) === -1; });
-      } else {
         entry.tags = entry.tags.filter(function(t){ return EXCLUSIVE.indexOf(t) === -1; });
       }
       entry.tags.push(tag);
@@ -173,8 +174,11 @@ var WishFormator = (function(){
     if(!entry.tags.length) entry.tags = ["wish"];
   }
 
+  /* Seul « à retirer » sort de la wishlist. Un personnage déjà acquis (✅)
+     y reste : c'est justement pour le re-drop qu'on le garde, il doit donc
+     continuer à donner et recevoir du bonus d'adjacence. */
   function isActive(entry){
-    return !hasTag(entry, "owned") && !hasTag(entry, "remove");
+    return !hasTag(entry, "remove");
   }
 
   function cleanName(name){
@@ -443,8 +447,11 @@ var WishFormator = (function(){
     var remove = withTag("remove");
     if(remove.length) lines.push(cmd("wishremove") + " " + remove.join("$"));
 
+    /* « Souhait » est l'état par défaut : on n'exige pas le tag explicite,
+       sinon un personnage marqué seulement ✅ n'était jamais ajouté à la
+       wishlist — donc jamais re-drop. Seuls ⭐ et 🤫 ont leur commande. */
     var plainAdd = entries.filter(function(e){
-      return isActive(e) && (hasTag(e, "wish") || hasTag(e, "lock")) && !hasTag(e, "quiet") && !hasTag(e, "star");
+      return isActive(e) && !hasTag(e, "quiet") && !hasTag(e, "star");
     }).map(function(e){ return e.name; });
     if(plainAdd.length) lines.push(cmd("wish") + " " + plainAdd.join("$"));
 
@@ -472,11 +479,13 @@ var WishFormator = (function(){
       lines.push(cmd(lockName) + " " + lock.join("$"));
     }
 
+    /* Pas de $wishpurge : il retirerait de la wishlist les personnages
+       marqués acquis, alors qu'on les y garde pour les re-drop. Le ✅ n'est
+       qu'un repère visuel, il ne change aucune commande. */
     var owned = withTag("owned");
     if(owned.length){
       lines.push("");
-      lines.push("# Déjà acquis : " + owned.join(", "));
-      lines.push(cmd("wishpurge"));
+      lines.push("# Déjà acquis, gardés en wishlist : " + owned.join(", "));
     }
 
     var carriers = activeEntries().filter(function(e){ return e.give > 0; });
