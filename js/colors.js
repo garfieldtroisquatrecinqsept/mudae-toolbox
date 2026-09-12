@@ -650,6 +650,10 @@ var ColorPicker = (function(){
     });
 
     $("colorScriptDownload").addEventListener("click", downloadBat);
+
+    $("colorScriptCopy").addEventListener("click", function(){
+      Utils.copyText($("colorScriptOutput").textContent, this);
+    });
   }
 
   function scriptCommands(){
@@ -745,12 +749,79 @@ var ColorPicker = (function(){
     $("colorScriptDownload").disabled = cmds.length === 0;
   }
 
+  var CRC_TABLE = (function(){
+    var table = new Uint32Array(256);
+    for(var i = 0; i < 256; i++){
+      var c = i;
+      for(var k = 0; k < 8; k++){
+        c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      }
+      table[i] = c >>> 0;
+    }
+    return table;
+  })();
+
+  function crc32(bytes){
+    var crc = 0xFFFFFFFF;
+    for(var i = 0; i < bytes.length; i++){
+      crc = CRC_TABLE[(crc ^ bytes[i]) & 0xFF] ^ (crc >>> 8);
+    }
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  function dosStamp(date){
+    var time = (date.getHours() << 11) | (date.getMinutes() << 5) | (date.getSeconds() >> 1);
+    var day = ((date.getFullYear() - 1980) << 9) | ((date.getMonth() + 1) << 5) | date.getDate();
+    return { time: time & 0xFFFF, date: day & 0xFFFF };
+  }
+
+  function zipOneFile(name, text){
+    var nameBytes = new TextEncoder().encode(name);
+    var data = new TextEncoder().encode(text);
+    var sum = crc32(data);
+    var stamp = dosStamp(new Date());
+
+    var localSize = 30 + nameBytes.length;
+    var centralSize = 46 + nameBytes.length;
+    var out = new Uint8Array(localSize + data.length + centralSize + 22);
+    var view = new DataView(out.buffer);
+    var at = 0;
+
+    function u32(value){ view.setUint32(at, value, true); at += 4; }
+    function u16(value){ view.setUint16(at, value, true); at += 2; }
+    function raw(bytes){ out.set(bytes, at); at += bytes.length; }
+
+    u32(0x04034b50);
+    u16(20); u16(0); u16(0);
+    u16(stamp.time); u16(stamp.date);
+    u32(sum); u32(data.length); u32(data.length);
+    u16(nameBytes.length); u16(0);
+    raw(nameBytes);
+    raw(data);
+
+    var centralAt = at;
+    u32(0x02014b50);
+    u16(20); u16(20); u16(0); u16(0);
+    u16(stamp.time); u16(stamp.date);
+    u32(sum); u32(data.length); u32(data.length);
+    u16(nameBytes.length); u16(0); u16(0);
+    u16(0); u16(0); u32(32); u32(0);
+    raw(nameBytes);
+
+    u32(0x06054b50);
+    u16(0); u16(0); u16(1); u16(1);
+    u32(centralSize); u32(centralAt);
+    u16(0);
+
+    return out;
+  }
+
   function downloadBat(){
-    var blob = new Blob([buildBat()], { type: "application/octet-stream" });
-    var url = URL.createObjectURL(blob);
+    var zip = zipOneFile("mudae-couleurs.bat", buildBat());
+    var url = URL.createObjectURL(new Blob([zip], { type: "application/zip" }));
     var a = document.createElement("a");
     a.href = url;
-    a.download = "mudae-couleurs.bat";
+    a.download = "mudae-couleurs.zip";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
