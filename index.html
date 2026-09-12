@@ -780,7 +780,7 @@ Kiki ·   (1) - https://mudae.net/uploads/8461491/BbQaFi0~mIGi658.png"></textare
       <h3 id="colorScriptTitle">Envoi automatique</h3>
       <button class="modal-close" id="colorScriptClose" type="button" aria-label="Fermer">×</button>
     </div>
-    <p class="sub">Un script à coller une fois dans la console de Discord : il écrit chaque commande dans le salon, l'envoie, attend, puis passe à la suivante.</p>
+    <p class="sub">Télécharge un petit fichier qui écrit chaque commande dans Discord, l'envoie, attend, puis passe à la suivante. Rien à installer.</p>
 
     <div class="script-fields">
       <div>
@@ -798,21 +798,24 @@ Kiki ·   (1) - https://mudae.net/uploads/8461491/BbQaFi0~mIGi658.png"></textare
     <p class="hint" id="colorScriptCount"></p>
 
     <ol class="script-steps">
-      <li>Ouvre Discord dans <b>Chrome, Edge ou Firefox</b> et place-toi dans le salon voulu.</li>
-      <li><b>F12</b> pour ouvrir les outils de développement, puis onglet <b>Console</b>.</li>
-      <li>Si la console refuse le collage, tape d'abord <code>allow pasting</code> puis Entrée.</li>
-      <li>Colle le script ci-dessous, Entrée, et laisse l'onglet ouvert le temps que ça tourne.</li>
-      <li>Pour interrompre en cours de route : <code>mudaeStop()</code> dans la console.</li>
+      <li>Télécharge <code>mudae-couleurs.bat</code> avec le bouton en bas.</li>
+      <li>Ouvre Discord sur le salon voulu, puis double-clique le fichier.</li>
+      <li>Une fenêtre noire s'ouvre : appuie sur <b>Entrée</b>, tu as 5 secondes pour cliquer dans le champ de message de Discord.</li>
+      <li>Ne touche plus au clavier ni à la souris pendant l'envoi.</li>
+      <li>Pour tout arrêter : ferme la fenêtre noire, ou <code>Ctrl + C</code> dedans.</li>
     </ol>
 
-    <div class="output-box script-box" id="colorScriptOutput"></div>
+    <details class="script-peek">
+      <summary>Voir le contenu du fichier</summary>
+      <div class="output-box script-box" id="colorScriptOutput"></div>
+    </details>
 
     <div class="warn-box">
-      Discord n'apprécie pas l'automatisation du client : espace bien les envois et évite les longues séries d'un coup. Tu utilises ça à tes risques.
+      Windows affichera sûrement un avertissement au lancement : <b>Informations complémentaires</b>, puis <b>Exécuter quand même</b>. Le fichier se sert du presse-papiers, son contenu actuel sera remplacé. Et Discord n'apprécie pas l'automatisation du client : espace bien les envois, tu utilises ça à tes risques.
     </div>
 
     <div class="btn-row">
-      <button class="btn-primary" id="colorScriptCopy" type="button">Copier le script</button>
+      <button class="btn-primary" id="colorScriptDownload" type="button">Télécharger le .bat</button>
     </div>
   </div>
 </div>

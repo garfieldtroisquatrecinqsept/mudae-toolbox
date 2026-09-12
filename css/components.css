@@ -1511,3 +1511,12 @@ textarea{min-height:96px;}
 @media (max-width:560px){
   .script-fields{grid-template-columns:1fr;}
 }
+.script-peek{margin-bottom:var(--s-3);}
+.script-peek summary{
+  cursor:pointer;
+  font-size:var(--t-sm);
+  color:var(--text-dim);
+  padding:var(--s-2) 0;
+}
+.script-peek summary:hover{color:var(--text);}
+.script-peek .script-box{margin-top:var(--s-2);}

@@ -649,9 +649,7 @@ var ColorPicker = (function(){
       });
     });
 
-    $("colorScriptCopy").addEventListener("click", function(){
-      Utils.copyText($("colorScriptOutput").textContent, this);
-    });
+    $("colorScriptDownload").addEventListener("click", downloadBat);
   }
 
   function scriptCommands(){
@@ -676,91 +674,64 @@ var ColorPicker = (function(){
     return min + " min " + (sec < 10 ? "0" : "") + sec + " s";
   }
 
-  function buildScript(){
+  function psQuote(text){
+    return "'" + text.replace(/'/g, "''") + "'";
+  }
+
+  function buildBat(){
     var cmds = scriptCommands();
     var timing = scriptTiming();
-    var list = cmds.length
-      ? cmds.map(function(cmd){ return "    " + JSON.stringify(cmd) + ","; }).join("\n")
-      : "";
 
     return [
-      "/* Mudae Toolbox " + String.fromCharCode(8212) + " envoie chaque commande une par une. */",
-      "(function(){",
-      "  var CMDS = [",
-      list,
-      "  ];",
-      "  var PAUSE = " + timing.pause + ";",
-      "  var ALEA = " + timing.jitter + ";",
+      "@echo off",
+      "chcp 65001 >nul",
+      "title Mudae Toolbox - envoi automatique",
+      "rem  Genere par Mudae Toolbox. Ecrit chaque commande dans Discord,",
+      "rem  l'envoie, attend, puis passe a la suivante.",
+      "rem  Le detail de ce qui est envoye se lit plus bas dans ce fichier.",
+      "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$m='#:'+'PS:#'; " +
+        "$src=[IO.File]::ReadAllText('%~f0',[Text.Encoding]::UTF8); " +
+        "Invoke-Expression $src.Substring($src.IndexOf($m)+$m.Length)\"",
+      "exit /b",
+      "#:PS:#",
+      "Add-Type -AssemblyName System.Windows.Forms",
       "",
-      "  if(window.__mudaeAuto && window.__mudaeAuto.running){",
-      '    console.log("[Mudae] Un envoi tourne deja. Tape mudaeStop() pour interrompre.");',
-      "    return;",
+      "$CMDS = @(",
+      cmds.map(function(cmd){ return "  " + psQuote(cmd); }).join("\r\n"),
+      ")",
+      "$PAUSE = " + timing.pause,
+      "$ALEA  = " + timing.jitter,
+      "",
+      "Write-Host ''",
+      "Write-Host \"  $($CMDS.Count) commande(s) a envoyer.\"",
+      "Write-Host '  Ouvre Discord sur le bon salon avant de continuer.'",
+      "Write-Host ''",
+      "Read-Host '  Entree pour demarrer'",
+      "Write-Host ''",
+      "Write-Host '  Clique dans le champ de message de Discord, maintenant.'",
+      "foreach ($n in 5..1) { Write-Host \"  $n...\"; Start-Sleep -Seconds 1 }",
+      "Write-Host ''",
+      "",
+      "$fait = 0",
+      "foreach ($cmd in $CMDS) {",
+      "  Set-Clipboard -Value $cmd",
+      "  Start-Sleep -Milliseconds 150",
+      "  [System.Windows.Forms.SendKeys]::SendWait('^v')",
+      "  Start-Sleep -Milliseconds 250",
+      "  [System.Windows.Forms.SendKeys]::SendWait('{ENTER}')",
+      "  $fait++",
+      "  Write-Host \"  $fait / $($CMDS.Count)  $cmd\"",
+      "  if ($fait -lt $CMDS.Count) {",
+      "    $extra = 0",
+      "    if ($ALEA -gt 0) { $extra = Get-Random -Maximum $ALEA }",
+      "    Start-Sleep -Milliseconds ($PAUSE + $extra)",
       "  }",
+      "}",
       "",
-      "  function champ(){",
-      "    var list = document.querySelectorAll(",
-      '      "div[role=textbox][contenteditable=true]");',
-      "    return list[list.length - 1] || null;",
-      "  }",
-      "",
-      "  if(!champ()){",
-      '    console.log("[Mudae] Champ de message introuvable. Clique dans la zone de saisie du salon, puis relance le script.");',
-      "    return;",
-      "  }",
-      "",
-      "  var etat = { running: true, sent: 0, total: CMDS.length };",
-      "  window.__mudaeAuto = etat;",
-      "  window.mudaeStop = function(){",
-      "    etat.running = false;",
-      '    return "[Mudae] Arret demande.";',
-      "  };",
-      "",
-      "  function ecrire(el, texte){",
-      "    el.focus();",
-      "    var ok = false;",
-      '    try { ok = document.execCommand("insertText", false, texte); } catch(e){ ok = false; }',
-      '    if(ok && (el.textContent || "").indexOf(texte.slice(0, 6)) !== -1) return;',
-      "    var dt = new DataTransfer();",
-      '    dt.setData("text/plain", texte);',
-      '    el.dispatchEvent(new ClipboardEvent("paste", {',
-      "      clipboardData: dt, bubbles: true, cancelable: true",
-      "    }));",
-      "  }",
-      "",
-      "  function entree(el){",
-      "    var o = {",
-      '      key: "Enter", code: "Enter", keyCode: 13, which: 13,',
-      "      bubbles: true, cancelable: true, composed: true",
-      "    };",
-      '    el.dispatchEvent(new KeyboardEvent("keydown", o));',
-      '    el.dispatchEvent(new KeyboardEvent("keyup", o));',
-      "  }",
-      "",
-      "  function etape(i){",
-      "    if(!etat.running || i >= CMDS.length){",
-      "      etat.running = false;",
-      '      console.log("[Mudae] Fini : " + etat.sent + " / " + etat.total + " commande(s) envoyee(s).");',
-      "      return;",
-      "    }",
-      "    var el = champ();",
-      "    if(!el){",
-      "      etat.running = false;",
-      '      console.log("[Mudae] Champ de message perdu, arret a " + etat.sent + " / " + etat.total + ".");',
-      "      return;",
-      "    }",
-      "    ecrire(el, CMDS[i]);",
-      "    setTimeout(function(){",
-      "      entree(champ() || el);",
-      "      etat.sent = i + 1;",
-      '      console.log("[Mudae] " + etat.sent + " / " + etat.total + "  " + CMDS[i]);',
-      "      setTimeout(function(){ etape(i + 1); }, PAUSE + Math.random() * ALEA);",
-      "    }, 160);",
-      "  }",
-      "",
-      '  console.log("[Mudae] " + CMDS.length + " commande(s) a envoyer. mudaeStop() pour interrompre.");',
-      "  etape(0);",
-      "})();"
-    ].join("\n");
+      "Write-Host ''",
+      "Write-Host \"  Fini : $fait commande(s) envoyee(s).\"",
+      "Read-Host '  Entree pour fermer'"
+    ].join("\r\n") + "\r\n";
   }
 
   function refreshScript(){
@@ -769,8 +740,21 @@ var ColorPicker = (function(){
     $("colorScriptCount").textContent = cmds.length
       ? cmds.length + " commande(s), environ " +
         humanDuration(cmds.length * (timing.pause + timing.jitter / 2)) + " d'envoi."
-      : "Aucune couleur attribuée pour l'instant : le script serait vide.";
-    $("colorScriptOutput").textContent = buildScript();
+      : "Aucune couleur attribuée pour l'instant : le fichier serait vide.";
+    $("colorScriptOutput").textContent = buildBat();
+    $("colorScriptDownload").disabled = cmds.length === 0;
+  }
+
+  function downloadBat(){
+    var blob = new Blob([buildBat()], { type: "application/octet-stream" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "mudae-couleurs.bat";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
   }
 
   function openScript(){
