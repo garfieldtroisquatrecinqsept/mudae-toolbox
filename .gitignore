@@ -1,0 +1,12 @@
+# Sources des sprites Pokémon : servent uniquement à fabriquer l'atlas
+# base64 déjà embarqué dans js/assets.js, le site ne les charge jamais.
+Black & White Sprites/
+*.tgz
+
+# Junk système
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Config locale de l'aperçu
+.claude/

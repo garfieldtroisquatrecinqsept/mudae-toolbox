@@ -146,31 +146,6 @@
     layout();
   }
 
-  function initHero(){
-    var strips = document.getElementById("heroStrips");
-    if(strips){
-      var count = window.innerWidth < 640 ? 8 : 14;
-      for(var i = 0; i < count; i++){
-        var span = document.createElement("span");
-        span.style.animationDelay = (i * 0.12) + "s";
-        strips.appendChild(span);
-      }
-    }
-
-    var reduceMotion = window.matchMedia &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    var hero = document.getElementById("hero");
-    if(hero && !reduceMotion && window.matchMedia && window.matchMedia("(hover: hover)").matches){
-      hero.addEventListener("pointermove", function(e){
-        var rect = hero.getBoundingClientRect();
-        var mx = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
-        var my = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
-        hero.style.setProperty("--mx", mx + "%");
-        hero.style.setProperty("--my", my + "%");
-      });
-    }
-  }
-
   /* Halo qui suit le curseur sur la carte survolée. Un seul écouteur
      délégué sur <main> plutôt qu'un par carte : les cartes sont créées
      et détruites dynamiquement par plusieurs modules. */
@@ -214,7 +189,6 @@
 
   document.addEventListener("DOMContentLoaded", function(){
     initTheme();
-    initHero();
     initTabs();
     initCarousel();
     initCardSpotlight();

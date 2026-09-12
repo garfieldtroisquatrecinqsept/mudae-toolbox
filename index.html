@@ -61,8 +61,6 @@
 </div>
 
 <header class="hero" id="hero">
-  <div class="hero-strips" id="heroStrips" aria-hidden="true"></div>
-  <div class="hero-spotlight" id="heroSpotlight" aria-hidden="true"></div>
   <button class="hero-stats-btn" id="statsHeroBtn" type="button">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="20" x2="5" y2="12"/><line x1="12" y1="20" x2="12" y2="6"/><line x1="19" y1="20" x2="19" y2="15"/></svg>
     Mes stats
@@ -71,7 +69,6 @@
     <span class="hero-badge"><span class="dot"></span>Assistant Mudae non-officiel</span>
     <h1 class="hero-title">
       <span class="word">Mudae</span><span class="word accent">Toolbox</span>
-      <span class="hero-reflection" aria-hidden="true">Mudae Toolbox</span>
     </h1>
     <div class="hero-cta">
       <a class="hero-btn hero-btn-primary" href="#tabs">Découvrir les outils ↓</a>
@@ -691,6 +688,7 @@ Kiki ·   (1) - https://mudae.net/uploads/8461491/BbQaFi0~mIGi658.png"></textare
           <div class="output-box" id="colorOutput"></div>
           <div class="btn-row">
             <button class="small-btn" id="colorCopyBtn">Copier</button>
+            <button class="small-btn" id="colorScriptBtn" type="button">Envoi automatique</button>
           </div>
         </div>
         </div>
@@ -773,6 +771,49 @@ Kiki ·   (1) - https://mudae.net/uploads/8461491/BbQaFi0~mIGi658.png"></textare
       <button class="btn-primary" id="statsParseBtn">Appliquer</button>
     </div>
     <div class="status" id="statsStatus"></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="colorScriptBackdrop" style="display:none;">
+  <div class="modal modal-lg" id="colorScriptModal" role="dialog" aria-modal="true" aria-labelledby="colorScriptTitle">
+    <div class="modal-head">
+      <h3 id="colorScriptTitle">Envoi automatique</h3>
+      <button class="modal-close" id="colorScriptClose" type="button" aria-label="Fermer">×</button>
+    </div>
+    <p class="sub">Un script à coller une fois dans la console de Discord : il écrit chaque commande dans le salon, l'envoie, attend, puis passe à la suivante.</p>
+
+    <div class="script-fields">
+      <div>
+        <label for="colorScriptDelay">Pause entre deux commandes</label>
+        <input type="number" id="colorScriptDelay" min="300" step="100" value="2000">
+        <p class="hint">En millisecondes. 2000 = 2 secondes.</p>
+      </div>
+      <div>
+        <label for="colorScriptJitter">Variation aléatoire</label>
+        <input type="number" id="colorScriptJitter" min="0" step="100" value="800">
+        <p class="hint">Ajoutée au hasard à chaque pause, pour ne pas envoyer à intervalle parfaitement régulier.</p>
+      </div>
+    </div>
+
+    <p class="hint" id="colorScriptCount"></p>
+
+    <ol class="script-steps">
+      <li>Ouvre Discord dans <b>Chrome, Edge ou Firefox</b> et place-toi dans le salon voulu.</li>
+      <li><b>F12</b> pour ouvrir les outils de développement, puis onglet <b>Console</b>.</li>
+      <li>Si la console refuse le collage, tape d'abord <code>allow pasting</code> puis Entrée.</li>
+      <li>Colle le script ci-dessous, Entrée, et laisse l'onglet ouvert le temps que ça tourne.</li>
+      <li>Pour interrompre en cours de route : <code>mudaeStop()</code> dans la console.</li>
+    </ol>
+
+    <div class="output-box script-box" id="colorScriptOutput"></div>
+
+    <div class="warn-box">
+      Discord n'apprécie pas l'automatisation du client : espace bien les envois et évite les longues séries d'un coup. Tu utilises ça à tes risques.
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-primary" id="colorScriptCopy" type="button">Copier le script</button>
+    </div>
   </div>
 </div>
 

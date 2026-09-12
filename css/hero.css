@@ -98,43 +98,17 @@ html{scroll-behavior:smooth;}
   pointer-events:none;
   z-index:0;
 }
-.hero-strips{
-  position:absolute;inset:0;
-  display:flex;
-  pointer-events:none;
-  z-index:0;
-}
-.hero-strips span{
-  flex:1;height:100%;
-  background:linear-gradient(180deg, rgba(var(--fg-rgb),0) 0%, rgba(var(--fg-rgb),.04) 50%, rgba(var(--fg-rgb),0) 100%);
-  border-right:1px solid rgba(var(--fg-rgb),.02);
-  animation:stripPulse 5s ease-in-out infinite;
-}
-.hero-strips span:last-child{border-right:none;}
-@keyframes stripPulse{
-  0%,100%{opacity:.2;}
-  50%{opacity:.6;}
-}
-.hero-spotlight{
-  position:absolute;inset:0;
-  z-index:0;
-  background:radial-gradient(560px circle at var(--mx,50%) var(--my,28%), rgba(var(--fg-rgb),.06), transparent 62%);
-  pointer-events:none;
-}
-
-/* Le grain, les bandes de verre et le spot s'arrêtent net au bord
-   du hero (ils sont clippés par overflow:hidden) : sans ce fondu,
-   la texture disparaît d'un coup pile à la jonction avec la barre
-   de navigation, ce qui se voit comme une coupure même si la
-   couleur de fond est désormais identique des deux côtés. */
-.hero::after{
-  content:"";
-  position:absolute;
-  left:0;right:0;bottom:0;
-  height:220px;
-  background:linear-gradient(to bottom, transparent, var(--bg));
-  pointer-events:none;
-  z-index:1;
+/* Le grain est clippé net par overflow:hidden au bord du hero. On ne
+   le recouvre pas d'un dégradé opaque vers var(--bg) : celui-ci
+   effaçait aussi les halos de .bg-fx sur les 220 derniers pixels,
+   alors qu'ils restent visibles juste en dessous, ce qui créait une
+   ligne horizontale franche. Le grain porte donc son propre fondu, et
+   le fond fixe reste continu d'un bout à l'autre de la page. */
+.hero::before{
+  -webkit-mask-image:linear-gradient(to bottom,
+    #000 0%, #000 42%, rgba(0,0,0,.55) 74%, transparent 99%);
+  mask-image:linear-gradient(to bottom,
+    #000 0%, #000 42%, rgba(0,0,0,.55) 74%, transparent 99%);
 }
 
 .hero-inner{
@@ -197,8 +171,7 @@ html{scroll-behavior:smooth;}
   flex:none;
 }
 
-/* ---- Titre : blanc, avec un balayage lumineux (le "reflet")
-   qui traverse le texte en boucle, façon verre/métal brossé ---- */
+/* ---- Titre : blanc plein, sans balayage ni reflet ---- */
 .hero-title{
   font-family:var(--font-display);
   font-size:clamp(2.6rem, 7.5vw, 5.4rem);
@@ -210,52 +183,17 @@ html{scroll-behavior:smooth;}
 }
 .hero-title .word{
   display:inline-block;
-  background-image:linear-gradient(
-    100deg,
-    var(--fg) 0%, var(--fg) 38%,
-    rgba(var(--fg-rgb),.35) 48%,
-    var(--fg) 58%, var(--fg) 100%
-  );
-  background-size:260% 100%;
-  background-position:160% 0;
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
-  filter:drop-shadow(0 0 26px rgba(var(--fg-rgb),.16));
-  animation:heroWordIn .9s var(--ease-spring) both,
-            heroShine 5s ease-in-out 1.1s infinite;
+  color:var(--fg);
+  animation:heroWordIn .9s var(--ease-spring) both;
 }
 .hero-title .word.accent{
   margin-left:.28em;
   color:rgba(var(--fg-rgb),.4);
-  -webkit-text-fill-color:rgba(var(--fg-rgb),.4);
-  background:none;
-  filter:none;
   animation:heroWordIn .9s var(--ease-spring) .12s both;
 }
 @keyframes heroWordIn{
   from{opacity:0; transform:translateY(28px);}
   to{opacity:1; transform:translateY(0);}
-}
-@keyframes heroShine{
-  0%,15%{background-position:160% 0;}
-  55%,100%{background-position:-60% 0;}
-}
-.hero-reflection{
-  position:absolute;
-  top:100%;left:0;right:0;
-  transform:scaleY(-1);
-  line-height:1.02;
-  font-family:inherit;
-  font-size:inherit;
-  font-weight:inherit;
-  letter-spacing:inherit;
-  color:var(--fg);
-  opacity:.14;
-  -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,.7), transparent 62%);
-  mask-image:linear-gradient(to bottom, rgba(0,0,0,.7), transparent 62%);
-  pointer-events:none;
-  user-select:none;
 }
 
 .hero-sub{
@@ -290,11 +228,11 @@ html{scroll-behavior:smooth;}
   background:var(--fg);
   color:var(--bg);
   border-color:transparent;
-  box-shadow:0 8px 28px rgba(var(--fg-rgb),.16), 0 2px 0 rgba(var(--bg-rgb),.06) inset;
+  box-shadow:0 2px 10px rgba(var(--bg-rgb),.28);
 }
 .hero-btn-primary:hover{
-  transform:translateY(-3px) scale(1.03);
-  box-shadow:0 16px 44px rgba(var(--fg-rgb),.26), 0 2px 0 rgba(var(--bg-rgb),.06) inset;
+  transform:translateY(-2px);
+  box-shadow:0 6px 18px rgba(var(--bg-rgb),.34);
 }
 .hero-btn-primary:active{
   transform:translateY(-1px) scale(.98);
@@ -345,8 +283,4 @@ html{scroll-behavior:smooth;}
   .hero{min-height:min(88vh, 560px);padding:var(--s-12) var(--s-4) var(--s-10);}
   .hero-sub{font-size:var(--t-base);}
   .hero-scroll{display:none;}
-}
-
-@media (prefers-reduced-motion: reduce){
-  .hero-spotlight{display:none;}
 }
