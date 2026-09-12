@@ -1475,3 +1475,39 @@ textarea{min-height:96px;}
   .wish-item .perk-badges{border-left:none;padding-left:0;min-width:0;}
   .stat-grid{grid-template-columns:repeat(auto-fit,minmax(130px,1fr));}
 }
+
+/* ---- Popup « Envoi automatique » de l'onglet Couleurs ---- */
+.script-fields{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:var(--s-4);
+  margin-bottom:var(--s-3);
+}
+.script-fields .hint{margin-top:var(--s-1);}
+.script-steps{
+  margin:0 0 var(--s-4);
+  padding-left:var(--s-5);
+  font-size:var(--t-sm);
+  line-height:var(--lh-relaxed);
+  color:var(--text-dim);
+}
+.script-steps li{margin-bottom:var(--s-1);}
+.script-steps code{
+  font-family:var(--font-mono);
+  font-size:.92em;
+  padding:1px 5px;
+  border-radius:var(--r-sm);
+  background:var(--surface2);
+  border:1px solid var(--border-subtle);
+  color:var(--text);
+}
+.script-box{
+  max-height:240px;
+  overflow:auto;
+  white-space:pre;
+  font-size:var(--t-xs);
+  line-height:1.55;
+}
+@media (max-width:560px){
+  .script-fields{grid-template-columns:1fr;}
+}

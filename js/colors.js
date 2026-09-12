@@ -10,7 +10,9 @@ var ColorPicker = (function(){
       targets: targets.map(function(t){
         return { name: t.name, keys: t.keys, url: t.url, color: t.color };
       }),
-      command: $("colorCommand").value
+      command: $("colorCommand").value,
+      scriptDelay: $("colorScriptDelay").value,
+      scriptJitter: $("colorScriptJitter").value
     };
     store.save(state);
     store.checkpoint(state);
@@ -26,6 +28,8 @@ var ColorPicker = (function(){
       });
       if(hasOption) $("colorCommand").value = state.command;
     }
+    if(state.scriptDelay) $("colorScriptDelay").value = state.scriptDelay;
+    if(state.scriptJitter) $("colorScriptJitter").value = state.scriptJitter;
   }
 
   var PRESETS = [
@@ -76,6 +80,7 @@ var ColorPicker = (function(){
       });
     $("colorOutput").textContent = lines.join("\n");
     $("colorAssigned").textContent = lines.length + " / " + targets.length + " personnage(s) coloré(s)";
+    if($("colorScriptBackdrop").style.display !== "none") refreshScript();
     persist();
   }
 
@@ -625,6 +630,156 @@ var ColorPicker = (function(){
     $("colorCopyBtn").addEventListener("click", function(){
       Utils.copyText($("colorOutput").textContent, this);
     });
+ 
+    $("colorScriptBtn").addEventListener("click", openScript);
+    $("colorScriptClose").addEventListener("click", closeScript);
+
+    $("colorScriptBackdrop").addEventListener("click", function(e){
+      if(e.target === $("colorScriptBackdrop")) closeScript();
+    });
+
+    document.addEventListener("keydown", function(e){
+      if(e.key === "Escape" && $("colorScriptBackdrop").style.display !== "none") closeScript();
+    });
+
+    ["colorScriptDelay", "colorScriptJitter"].forEach(function(id){
+      $(id).addEventListener("input", function(){
+        refreshScript();
+        persist();
+      });
+    });
+
+    $("colorScriptCopy").addEventListener("click", function(){
+      Utils.copyText($("colorScriptOutput").textContent, this);
+    });
+  }
+
+  function scriptCommands(){
+    return $("colorOutput").textContent.split(/\r?\n/).filter(function(line){
+      return line.trim() !== "";
+    });
+  }
+
+  function scriptTiming(){
+    var pause = parseInt($("colorScriptDelay").value, 10);
+    var jitter = parseInt($("colorScriptJitter").value, 10);
+    if(!(pause >= 300)) pause = 2000;
+    if(!(jitter >= 0)) jitter = 0;
+    return { pause: pause, jitter: jitter };
+  }
+
+  function humanDuration(ms){
+    var total = Math.round(ms / 1000);
+    var min = Math.floor(total / 60);
+    var sec = total % 60;
+    if(!min) return sec + " s";
+    return min + " min " + (sec < 10 ? "0" : "") + sec + " s";
+  }
+
+  function buildScript(){
+    var cmds = scriptCommands();
+    var timing = scriptTiming();
+    var list = cmds.length
+      ? cmds.map(function(cmd){ return "    " + JSON.stringify(cmd) + ","; }).join("\n")
+      : "";
+
+    return [
+      "/* Mudae Toolbox " + String.fromCharCode(8212) + " envoie chaque commande une par une. */",
+      "(function(){",
+      "  var CMDS = [",
+      list,
+      "  ];",
+      "  var PAUSE = " + timing.pause + ";",
+      "  var ALEA = " + timing.jitter + ";",
+      "",
+      "  if(window.__mudaeAuto && window.__mudaeAuto.running){",
+      '    console.log("[Mudae] Un envoi tourne deja. Tape mudaeStop() pour interrompre.");',
+      "    return;",
+      "  }",
+      "",
+      "  function champ(){",
+      "    var list = document.querySelectorAll(",
+      '      "div[role=textbox][contenteditable=true]");',
+      "    return list[list.length - 1] || null;",
+      "  }",
+      "",
+      "  if(!champ()){",
+      '    console.log("[Mudae] Champ de message introuvable. Clique dans la zone de saisie du salon, puis relance le script.");',
+      "    return;",
+      "  }",
+      "",
+      "  var etat = { running: true, sent: 0, total: CMDS.length };",
+      "  window.__mudaeAuto = etat;",
+      "  window.mudaeStop = function(){",
+      "    etat.running = false;",
+      '    return "[Mudae] Arret demande.";',
+      "  };",
+      "",
+      "  function ecrire(el, texte){",
+      "    el.focus();",
+      "    var ok = false;",
+      '    try { ok = document.execCommand("insertText", false, texte); } catch(e){ ok = false; }',
+      '    if(ok && (el.textContent || "").indexOf(texte.slice(0, 6)) !== -1) return;',
+      "    var dt = new DataTransfer();",
+      '    dt.setData("text/plain", texte);',
+      '    el.dispatchEvent(new ClipboardEvent("paste", {',
+      "      clipboardData: dt, bubbles: true, cancelable: true",
+      "    }));",
+      "  }",
+      "",
+      "  function entree(el){",
+      "    var o = {",
+      '      key: "Enter", code: "Enter", keyCode: 13, which: 13,',
+      "      bubbles: true, cancelable: true, composed: true",
+      "    };",
+      '    el.dispatchEvent(new KeyboardEvent("keydown", o));',
+      '    el.dispatchEvent(new KeyboardEvent("keyup", o));',
+      "  }",
+      "",
+      "  function etape(i){",
+      "    if(!etat.running || i >= CMDS.length){",
+      "      etat.running = false;",
+      '      console.log("[Mudae] Fini : " + etat.sent + " / " + etat.total + " commande(s) envoyee(s).");',
+      "      return;",
+      "    }",
+      "    var el = champ();",
+      "    if(!el){",
+      "      etat.running = false;",
+      '      console.log("[Mudae] Champ de message perdu, arret a " + etat.sent + " / " + etat.total + ".");',
+      "      return;",
+      "    }",
+      "    ecrire(el, CMDS[i]);",
+      "    setTimeout(function(){",
+      "      entree(champ() || el);",
+      "      etat.sent = i + 1;",
+      '      console.log("[Mudae] " + etat.sent + " / " + etat.total + "  " + CMDS[i]);',
+      "      setTimeout(function(){ etape(i + 1); }, PAUSE + Math.random() * ALEA);",
+      "    }, 160);",
+      "  }",
+      "",
+      '  console.log("[Mudae] " + CMDS.length + " commande(s) a envoyer. mudaeStop() pour interrompre.");',
+      "  etape(0);",
+      "})();"
+    ].join("\n");
+  }
+
+  function refreshScript(){
+    var cmds = scriptCommands();
+    var timing = scriptTiming();
+    $("colorScriptCount").textContent = cmds.length
+      ? cmds.length + " commande(s), environ " +
+        humanDuration(cmds.length * (timing.pause + timing.jitter / 2)) + " d'envoi."
+      : "Aucune couleur attribuée pour l'instant : le script serait vide.";
+    $("colorScriptOutput").textContent = buildScript();
+  }
+
+  function openScript(){
+    refreshScript();
+    $("colorScriptBackdrop").style.display = "flex";
+  }
+
+  function closeScript(){
+    $("colorScriptBackdrop").style.display = "none";
   }
 
   return { init: init };
