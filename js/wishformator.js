@@ -35,6 +35,19 @@ var WishFormator = (function(){
   var PRIORITY_EMOJI = "🎯";
   var store = Utils.createStore("mudae-wish");
 
+  /* Le rendu reconstruit toute la liste : sans mémoriser le bouton qui
+     vient d'être actionné, le focus retombe sur le body et on ne peut
+     pas enchaîner deux déplacements au clavier. */
+  var pendingFocus = null;
+
+  function moveEntry(from, to){
+    if(to < 0 || to >= entries.length) return;
+    var moved = entries.splice(from, 1)[0];
+    entries.splice(to, 0, moved);
+    pendingFocus = { index: to, dir: to < from ? "up" : "down" };
+    render();
+  }
+
   function persist(){
     var state = { entries: entries };
     store.save(state);
@@ -279,9 +292,34 @@ var WishFormator = (function(){
       rank.className = "rank";
       rank.textContent = index + 1;
 
-      var grip = document.createElement("div");
-      grip.className = "grip";
-      grip.textContent = "⣿";
+      /* Le glisser-déposer reste, mais il ne suffisait pas : il est
+         inutilisable au clavier comme au doigt, alors que l'ordre est
+         justement ce que $wishi reproduit. Deux boutons le doublent.
+         Ils disparaissent quand un filtre masque des voisins, sinon la
+         ligne semble ne pas bouger. */
+      var move = document.createElement("div");
+      move.className = "wish-move";
+
+      if(!filter){
+        [
+          { dir: "up",   symbol: "\u2191", label: "Monter",     target: index - 1, off: index === 0 },
+          { dir: "down", symbol: "\u2193", label: "Descendre",  target: index + 1, off: index === entries.length - 1 }
+        ].forEach(function(spec){
+          var b = document.createElement("button");
+          b.type = "button";
+          b.className = "wish-move-btn";
+          b.dataset.dir = spec.dir;
+          b.textContent = spec.symbol;
+          b.title = spec.label;
+          b.setAttribute("aria-label", spec.label + " : " + entry.name);
+          b.disabled = spec.off;
+          b.addEventListener("click", function(e){
+            e.stopPropagation();
+            moveEntry(index, spec.target);
+          });
+          move.appendChild(b);
+        });
+      }
 
       var name = document.createElement("div");
       name.className = "wname";
@@ -372,7 +410,7 @@ var WishFormator = (function(){
       });
 
       item.appendChild(rank);
-      item.appendChild(grip);
+      item.appendChild(move);
       item.appendChild(name);
       item.appendChild(badges);
       item.appendChild(lvl);
@@ -421,6 +459,19 @@ var WishFormator = (function(){
         Utils.emptyState(container, "heart-list", "Wishlist vide",
           "Colle ta wishlist plus haut pour la réorganiser et générer les commandes.");
       }
+    }
+
+    if(pendingFocus){
+      var movedRow = container.querySelector(
+        '.wish-item[data-index="' + pendingFocus.index + '"]');
+      if(movedRow){
+        var wanted = movedRow.querySelector(
+          '.wish-move-btn[data-dir="' + pendingFocus.dir + '"]:not([disabled])');
+        var fallback = movedRow.querySelector(".wish-move-btn:not([disabled])");
+        if(wanted) wanted.focus();
+        else if(fallback) fallback.focus();
+      }
+      pendingFocus = null;
     }
 
     var active = activeEntries();
@@ -547,6 +598,13 @@ var WishFormator = (function(){
     $("wishFilter").addEventListener("input", render);
 
     $("wishBuildBtn").addEventListener("click", function(){
+      var card = $("wishImportCard");
+      if(card && card.classList.contains("folded")){
+        card.classList.remove("folded");
+        this.textContent = this.dataset.label || "Importer et déduire les perks";
+        $("wishInput").focus();
+        return;
+      }
       var preview = $("wishInput").value.split(/\n/).filter(function(l){ return l.trim(); }).length;
       $("wishWorkspace").style.display = "block";
       showSkeleton(preview);
@@ -586,6 +644,14 @@ var WishFormator = (function(){
       $("wishWorkspace").style.display = "block";
       $("wishScriptCard").style.display = "none";
       render();
+
+      var importCard = $("wishImportCard");
+      if(importCard){
+        importCard.classList.add("folded");
+        var buildBtn = $("wishBuildBtn");
+        if(!buildBtn.dataset.label) buildBtn.dataset.label = buildBtn.textContent;
+        buildBtn.textContent = "Changer la liste";
+      }
     });
 
     $("wishAllLock").addEventListener("click", function(){ addToAll("lock"); });

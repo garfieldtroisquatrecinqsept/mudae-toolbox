@@ -32,7 +32,7 @@ html{scroll-behavior:smooth;}
   align-items:center;
   justify-content:center;
   text-align:center;
-  padding:var(--s-12) var(--s-6) var(--s-8);
+  padding:var(--s-10) var(--s-8) var(--s-6);
 }
 
 .hero-inner{

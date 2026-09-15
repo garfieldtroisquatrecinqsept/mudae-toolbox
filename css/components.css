@@ -344,12 +344,13 @@ button:active{
 
 /* ---- Liste triable ---- */
 .wish-item{
-  gap:var(--s-3);
-  padding:var(--s-3) var(--s-4);
+  gap:var(--s-2);
+  padding:var(--s-1) var(--s-3);
+  flex-wrap:nowrap;
   border-color:var(--border-subtle);
   border-radius:var(--r-md);
-  background:linear-gradient(180deg, var(--surface2), var(--n-900));
-  min-height:var(--touch-min);
+  background:var(--surface2);
+  min-height:34px;
   transition:border-color var(--d-fast) var(--ease-out),
              transform var(--d-fast) var(--ease-out),
              box-shadow var(--d-fast) var(--ease-out),
@@ -376,12 +377,72 @@ button:active{
   background:var(--n-950);
   border-color:var(--border-subtle);
 }
-.wish-item .grip{
-  font-size:16px;
-  color:var(--text-faint);
-  transition:color var(--d-fast) var(--ease-out);
+/* Les commandes de la liste tenaient sur six blocs empiles, soit
+   370 px de chrome avant d'atteindre le premier personnage. */
+.tool-row{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:var(--s-2);
+  margin-bottom:var(--s-3);
 }
-.wish-item:hover .grip{color:var(--text);}
+.tool-row-split{
+  justify-content:space-between;
+  gap:var(--s-3);
+}
+.tool-row .search-field{flex:1;min-width:180px;margin-bottom:0;}
+.tool-row .hint{margin-top:0;white-space:nowrap;}
+.tool-field{
+  display:inline-flex;
+  align-items:center;
+  gap:var(--s-2);
+  font-size:var(--t-xs);
+  color:var(--text-dim);
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  margin:0;
+}
+.tool-field input{width:72px;margin:0;}
+
+/* Une fois la wishlist importée, le pavé de collage n'a plus rien à
+   dire : il est replié et se rouvre d'un clic. */
+.card.folded > label,
+.card.folded > textarea,
+.card.folded > .radio-row{display:none;}
+.card.folded > .btn-row{margin-top:0;}
+
+.wish-move{
+  display:flex;
+  flex-direction:column;
+  gap:1px;
+  flex:none;
+}
+.wish-move-btn{
+  width:22px;
+  height:17px;
+  min-height:0;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  line-height:1;
+  border:1px solid var(--border-subtle);
+  border-radius:var(--r-sm);
+  background:transparent;
+  color:var(--text-dim);
+  cursor:pointer;
+  box-shadow:none;
+}
+.wish-move-btn:hover:not(:disabled){
+  color:var(--text);
+  border-color:var(--border-strong);
+  background:var(--accent-soft);
+}
+.wish-move-btn:disabled{
+  opacity:.3;
+  cursor:default;
+}
 .wish-item .wname{font-size:var(--t-base);font-weight:var(--fw-semi);}
 
 /* ---- Modale ---- */
@@ -902,7 +963,7 @@ button:active{
   padding:var(--s-2);
   box-shadow:var(--e-4);
   min-width:180px;
-  max-height:260px;
+  max-height:min(50vh,460px);
   overflow-y:auto;
   animation:bubbleIn var(--d-base) var(--ease-spring);
 }
@@ -1487,7 +1548,7 @@ textarea{min-height:96px;}
   color:var(--text);
 }
 .script-box{
-  max-height:240px;
+  max-height:min(46vh,420px);
   overflow:auto;
   white-space:pre;
   font-size:var(--t-xs);
