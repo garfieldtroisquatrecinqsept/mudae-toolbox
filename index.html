@@ -53,8 +53,7 @@
   <div class="loader-mark"><span></span><span></span><span></span></div>
 </div>
 
-<div class="bg-fx" aria-hidden="true">
-  <div class="bg-blob bg-blob-1"></div>
+<div class="bg-fx" aria-hidden="true"></div>
   <div class="bg-blob bg-blob-2"></div>
   <div class="bg-blob bg-blob-3"></div>
   <div class="bg-blob bg-blob-4"></div>
@@ -70,66 +69,54 @@
     <h1 class="hero-title">
       <span class="word">Mudae</span><span class="word accent">Toolbox</span>
     </h1>
-    <div class="hero-cta">
-      <a class="hero-btn hero-btn-primary" href="#tabs">Découvrir les outils ↓</a>
-    </div>
   </div>
-  <div class="hero-scroll"><span>Défiler</span><span class="chev"></span></div>
 </header>
 
 <div class="app">
   <div class="topbar">
     <div class="topbar-row">
-      <div class="brand"><svg class="brand-kakera" aria-hidden="true"><use href="#ico-kakera"></use></svg>Mudae Toolbox</div>
       <button class="theme-toggle" id="themeToggle" type="button" aria-label="Basculer en mode jour">
         <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
         <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12H5M19 12h2.5M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"/></svg>
       </button>
     </div>
-    <nav class="carousel" id="tabs" aria-label="Navigation principale">
-      <div class="carousel-row">
-        <button class="carousel-arrow" id="carouselPrev" type="button" aria-label="Précédent">‹</button>
-        <div class="carousel-stage">
-          <div class="carousel-track" id="carouselTrack">
-            <button class="tab-btn carousel-card active" data-tab="sprites">
-              <svg class="carousel-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><circle cx="12" cy="12" r="2.3" fill="currentColor" stroke="none"/></svg>
-              <span class="carousel-card-label">Sprites Pokémon</span>
-            </button>
-            <button class="tab-btn carousel-card" data-tab="cropper">
-              <svg class="carousel-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>
-              <span class="carousel-card-label">Cropper</span>
-            </button>
-            <button class="tab-btn carousel-card" data-tab="solvers">
-              <svg class="carousel-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-              <span class="carousel-card-label">Solvers</span>
-            </button>
-            <button class="tab-btn carousel-card" data-tab="wish">
-              <svg class="carousel-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.9-4.8 4.6 1.2 6.6L12 17.6l-5.9 3.1 1.2-6.6L2.5 9.5l6.6-.9L12 2.5z"/></svg>
-              <span class="carousel-card-label">Wish Formator</span>
-            </button>
-            <button class="tab-btn carousel-card" data-tab="boost">
-              <svg class="carousel-card-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>
-              <span class="carousel-card-label">Boostwish</span>
-            </button>
-            <button class="tab-btn carousel-card" data-tab="haremsort">
-              <svg class="carousel-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 2 8l10 6 10-6-10-6z"/><path d="M2 14l10 6 10-6"/></svg>
-              <span class="carousel-card-label">Tri Harem ($sm)</span>
-            </button>
-            <button class="tab-btn carousel-card" data-tab="colors">
-              <svg class="carousel-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="9" cy="9" r="6"/><circle cx="15" cy="9" r="6"/><circle cx="12" cy="15" r="6"/></svg>
-              <span class="carousel-card-label">Couleurs</span>
-            </button>
-          </div>
-        </div>
-        <button class="carousel-arrow" id="carouselNext" type="button" aria-label="Suivant">›</button>
+        <nav class="tabbar" id="tabs" aria-label="Outils">
+      <div class="tabbar-row" role="tablist">
+        <button class="tab-btn active" type="button" role="tab" id="tab-sprites" data-tab="sprites" aria-selected="true" aria-controls="panel-sprites" tabindex="0">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><circle cx="12" cy="12" r="2.3" fill="currentColor" stroke="none"/></svg>
+          <span>Sprites Pokémon</span>
+        </button>
+        <button class="tab-btn" type="button" role="tab" id="tab-cropper" data-tab="cropper" aria-selected="false" aria-controls="panel-cropper" tabindex="-1">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>
+          <span>Cropper</span>
+        </button>
+        <button class="tab-btn" type="button" role="tab" id="tab-solvers" data-tab="solvers" aria-selected="false" aria-controls="panel-solvers" tabindex="-1">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          <span>Solvers</span>
+        </button>
+        <button class="tab-btn" type="button" role="tab" id="tab-wish" data-tab="wish" aria-selected="false" aria-controls="panel-wish" tabindex="-1">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.9-4.8 4.6 1.2 6.6L12 17.6l-5.9 3.1 1.2-6.6L2.5 9.5l6.6-.9L12 2.5z"/></svg>
+          <span>Wish Formator</span>
+        </button>
+        <button class="tab-btn" type="button" role="tab" id="tab-boost" data-tab="boost" aria-selected="false" aria-controls="panel-boost" tabindex="-1">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>
+          <span>Boostwish</span>
+        </button>
+        <button class="tab-btn" type="button" role="tab" id="tab-haremsort" data-tab="haremsort" aria-selected="false" aria-controls="panel-haremsort" tabindex="-1">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 2 8l10 6 10-6-10-6z"/><path d="M2 14l10 6 10-6"/></svg>
+          <span>Tri Harem ($sm)</span>
+        </button>
+        <button class="tab-btn" type="button" role="tab" id="tab-colors" data-tab="colors" aria-selected="false" aria-controls="panel-colors" tabindex="-1">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="9" cy="9" r="6"/><circle cx="15" cy="9" r="6"/><circle cx="12" cy="15" r="6"/></svg>
+          <span>Couleurs</span>
+        </button>
       </div>
-      <div class="carousel-caption" id="carouselCaption"></div>
     </nav>
   </div>
 
   <main>
 
-    <section id="panel-sprites" class="panel active">
+    <section id="panel-sprites" class="panel active" role="tabpanel" aria-labelledby="tab-sprites" tabindex="0">
       <h1>Générateur de sprites Pokémon</h1>
       <p class="subtitle">Sprites Black &amp; White complets, 35 décors, 40 socles — 100% local.</p>
 
@@ -225,7 +212,7 @@
       </div>
     </section>
 
-    <section id="panel-cropper" class="panel">
+    <section id="panel-cropper" class="panel" role="tabpanel" aria-labelledby="tab-cropper" tabindex="0">
       <h1>Image Cropper Mudae</h1>
       <p class="subtitle">PNG, JPG et GIF animés. Le cadre Mudae s'applique automatiquement.</p>
 
@@ -311,7 +298,7 @@
       </div>
     </section>
 
-    <section id="panel-solvers" class="panel">
+    <section id="panel-solvers" class="panel" role="tabpanel" aria-labelledby="tab-solvers" tabindex="0">
       <h1>Solvers Ourosphères</h1>
       <p class="subtitle">Logique vérifiée contre les solveurs de référence de la communauté.</p>
 
@@ -401,7 +388,7 @@
       </div>
     </section>
 
-    <section id="panel-wish" class="panel">
+    <section id="panel-wish" class="panel" role="tabpanel" aria-labelledby="tab-wish" tabindex="0">
       <h1>Wish Formator</h1>
       <p class="subtitle">Le préfixe $ est intégré : tape juste les noms. Organise, tague, génère.</p>
 
@@ -474,7 +461,7 @@
       </div>
     </section>
 
-    <section id="panel-boost" class="panel">
+    <section id="panel-boost" class="panel" role="tabpanel" aria-labelledby="tab-boost" tabindex="0">
       <h1>Boostwish Calculator</h1>
       <p class="subtitle">Combien de rolls investir dans $bw pour maximiser tes chances.</p>
 
@@ -561,7 +548,7 @@
       </details>
     </section>
 
-    <section id="panel-haremsort" class="panel">
+    <section id="panel-haremsort" class="panel" role="tabpanel" aria-labelledby="tab-haremsort" tabindex="0">
       <h1>Tri du Harem ($sm)</h1>
       <p class="subtitle">Séries et personnages dans un seul trieur, mélangés dans l'ordre que tu veux.</p>
 
@@ -645,7 +632,7 @@
       </div>
     </section>
 
-    <section id="panel-colors" class="panel">
+    <section id="panel-colors" class="panel" role="tabpanel" aria-labelledby="tab-colors" tabindex="0">
       <h1>Couleurs</h1>
       <p class="subtitle">Choisis une couleur par personnage, le bloc de commandes se met à jour tout seul.</p>
 

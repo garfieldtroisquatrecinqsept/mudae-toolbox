@@ -48,104 +48,6 @@
   }
   initLoader();
 
-  function initCarousel(){
-    var track = document.getElementById("carouselTrack");
-    if(!track) return;
-    var cards = Array.prototype.slice.call(track.querySelectorAll(".carousel-card"));
-    var n = cards.length;
-    if(!n) return;
-
-    var activeIndex = 0;
-    cards.forEach(function(c, i){ if(c.classList.contains("active")) activeIndex = i; });
-
-    function circularOffset(i){
-      var raw = ((i - activeIndex) % n + n) % n;
-      if(raw > n / 2) raw -= n;
-      return raw;
-    }
-
-    var caption = document.getElementById("carouselCaption");
-
-    function layout(){
-      cards.forEach(function(card, i){
-        Array.prototype.slice.call(card.classList).forEach(function(c){
-          if(/^co--?\d+$/.test(c)) card.classList.remove(c);
-        });
-        card.classList.add("co-" + circularOffset(i));
-      });
-      if(caption) caption.textContent = cards[activeIndex].textContent.trim();
-    }
-
-    cards.forEach(function(card, i){
-      card.addEventListener("click", function(){
-        activeIndex = i;
-        layout();
-      });
-    });
-
-    var prev = document.getElementById("carouselPrev");
-    var next = document.getElementById("carouselNext");
-    if(prev) prev.addEventListener("click", function(){
-      cards[((activeIndex - 1) % n + n) % n].click();
-    });
-    if(next) next.addEventListener("click", function(){
-      cards[(activeIndex + 1) % n].click();
-    });
-
-    var stage = document.querySelector(".carousel-stage");
-    if(stage){
-      var DRAG_STEP = 70;
-      var dragX = null;
-      var dragAccum = 0;
-      var moved = false;
-
-      function onDragMove(e){
-        if(dragX === null) return;
-        var x = e.clientX;
-        var dx = x - dragX;
-        dragX = x;
-        dragAccum += dx;
-        while(dragAccum <= -DRAG_STEP){
-          cards[(activeIndex + 1) % n].click();
-          dragAccum += DRAG_STEP;
-          moved = true;
-        }
-        while(dragAccum >= DRAG_STEP){
-          cards[((activeIndex - 1) % n + n) % n].click();
-          dragAccum -= DRAG_STEP;
-          moved = true;
-        }
-      }
-      function onDragEnd(){
-        dragX = null;
-        stage.classList.remove("is-dragging");
-        document.removeEventListener("pointermove", onDragMove);
-        document.removeEventListener("pointerup", onDragEnd);
-        setTimeout(function(){ moved = false; }, 0);
-      }
-      stage.addEventListener("pointerdown", function(e){
-        dragX = e.clientX;
-        dragAccum = 0;
-        moved = false;
-        stage.classList.add("is-dragging");
-        document.addEventListener("pointermove", onDragMove);
-        document.addEventListener("pointerup", onDragEnd);
-      });
-      stage.addEventListener("click", function(e){
-        if(moved && e.isTrusted){ e.stopPropagation(); e.preventDefault(); }
-      }, true);
-    }
-
-    document.addEventListener("keydown", function(e){
-      var tag = document.activeElement && document.activeElement.tagName;
-      if(tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
-      if(e.key === "ArrowLeft" && prev) prev.click();
-      if(e.key === "ArrowRight" && next) next.click();
-    });
-
-    layout();
-  }
-
   /* Halo qui suit le curseur sur la carte survolée. Un seul écouteur
      délégué sur <main> plutôt qu'un par carte : les cartes sont créées
      et détruites dynamiquement par plusieurs modules. */
@@ -172,17 +74,39 @@
     });
   }
 
+  /* RangÃ©e d'onglets au motif ARIA tablist : un seul onglet dans
+     l'ordre de tabulation, les flÃ¨ches circulent entre eux, DÃ©but et
+     Fin sautent aux extrÃ©mitÃ©s. */
   function initTabs(){
-    document.querySelectorAll("#tabs .tab-btn").forEach(function(btn){
-      btn.addEventListener("click", function(){
-        document.querySelectorAll("#tabs .tab-btn").forEach(function(b){
-          b.classList.remove("active");
-        });
-        document.querySelectorAll(".panel").forEach(function(p){
-          p.classList.remove("active");
-        });
-        btn.classList.add("active");
-        document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+    var tabs = Array.prototype.slice.call(document.querySelectorAll("#tabs .tab-btn"));
+    if(!tabs.length) return;
+
+    function select(btn, focus){
+      tabs.forEach(function(b){
+        var on = b === btn;
+        b.classList.toggle("active", on);
+        b.setAttribute("aria-selected", on ? "true" : "false");
+        b.tabIndex = on ? 0 : -1;
+      });
+      document.querySelectorAll(".panel").forEach(function(p){
+        p.classList.remove("active");
+      });
+      var panel = document.getElementById("panel-" + btn.dataset.tab);
+      if(panel) panel.classList.add("active");
+      if(focus) btn.focus();
+    }
+
+    tabs.forEach(function(btn, i){
+      btn.addEventListener("click", function(){ select(btn, false); });
+      btn.addEventListener("keydown", function(e){
+        var next = null;
+        if(e.key === "ArrowRight") next = tabs[(i + 1) % tabs.length];
+        else if(e.key === "ArrowLeft") next = tabs[(i - 1 + tabs.length) % tabs.length];
+        else if(e.key === "Home") next = tabs[0];
+        else if(e.key === "End") next = tabs[tabs.length - 1];
+        if(!next) return;
+        e.preventDefault();
+        select(next, true);
       });
     });
   }
@@ -190,7 +114,6 @@
   document.addEventListener("DOMContentLoaded", function(){
     initTheme();
     initTabs();
-    initCarousel();
     initCardSpotlight();
     CropperTool.init();
     Solvers.init();
