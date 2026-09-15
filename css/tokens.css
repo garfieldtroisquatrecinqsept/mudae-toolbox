@@ -120,12 +120,6 @@
   --e-3:0 4px 14px -8px rgba(0,0,0,.5);
   --e-4:0 16px 40px -22px rgba(0,0,0,.6);
 
-  /* ---- Anciens halos : réduits à un liseré ----
-     Les noms restent pour ne pas casser les appels existants, mais
-     plus rien ne diffuse : un simple contour de 1px. */
-  --glow-purple:0 0 0 1px rgba(var(--fg-rgb),.3);
-  --glow-teal:0 0 0 1px rgba(var(--fg-rgb),.3);
-  --glow-mono:0 0 0 1px rgba(var(--fg-rgb),.3);
 
   /* ---- Mouvement ---- */
   --d-instant:80ms;
@@ -196,9 +190,6 @@
   --e-3:0 4px 14px -8px rgba(20,20,26,.2);
   --e-4:0 16px 40px -22px rgba(20,20,26,.3);
 
-  --glow-purple:0 0 0 1px rgba(20,20,26,.28);
-  --glow-teal:0 0 0 1px rgba(20,20,26,.28);
-  --glow-mono:0 0 0 1px rgba(20,20,26,.28);
   --blob-blend:normal;
 
   /* Les pastels d'origine n'ont pas assez de contraste en texte sur

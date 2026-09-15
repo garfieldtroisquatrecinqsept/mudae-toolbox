@@ -88,7 +88,6 @@ body{
   background:rgba(var(--fg-rgb),.08);
   border-color:rgba(var(--fg-rgb),.6);
   color:var(--fg);
-  box-shadow:var(--glow-mono);
 }
 
 /* ---- Cartes ---- */
@@ -678,7 +677,6 @@ button:active{
 #panel-haremsort, #panel-colors{
   --panel-accent:var(--fg);
   --panel-accent-2:#9a9a9a;
-  --panel-glow:var(--glow-mono);
 }
 
 .panel h1{
@@ -699,7 +697,7 @@ button:active{
 }
 
 .panel .card:hover{
-  box-shadow:var(--e-3), var(--panel-glow, var(--glow-mono));
+  box-shadow:none;
 }
 
 .panel .tab-btn.solver-tab.active{
@@ -730,31 +728,18 @@ button:active{
   flex:1 1 260px;min-width:200px;
 }
 
-/* Halo par palier de rareté (kakera) : inspiré d'une carte profil à
-   glow par tier trouvée via le MCP 21st, adapté en CSS pur au lieu
-   du composant React/Tailwind d'origine. */
-.harem-item.k-none{ --tier-glow:none; }
-.harem-item.k-low{  --tier-glow:none; }
-.harem-item.k-mid{  --tier-glow:none; }
-.harem-item.k-high{ --tier-glow:none; }
-.harem-item.k-top{  --tier-glow:none; }
-
 .harem-item:hover{
   transform:translateY(-2px);
-  box-shadow:var(--e-2), var(--tier-glow, var(--glow-mono));
+  box-shadow:var(--e-2);
 }
 
-/* ---- Vignettes personnage : avatar circulaire façon Discord, avec
-   halo permanent au palier de rareté (repris du glow "tier" de la
-   carte 21st, sur un avatar rond plutôt qu'un panneau 3D complet
-   pour rester cohérent avec les listes du reste du site) ---- */
+/* ---- Vignettes personnage : avatar circulaire façon Discord ---- */
 .harem-item .harem-avatar{
   width:48px;height:48px;flex:none;object-fit:cover;
   border-radius:50%;
   border:2px solid var(--n-950);
   background:var(--n-950);
-  box-shadow:var(--tier-glow, none);
-  transition:box-shadow var(--d-base) var(--ease-out), transform var(--d-fast) var(--ease-spring);
+  transition:transform var(--d-fast) var(--ease-spring);
 }
 .harem-avatar-fallback{
   width:48px;height:48px;flex:none;
@@ -766,9 +751,8 @@ button:active{
   font-weight:var(--fw-bold);
   font-size:var(--t-sm);
   letter-spacing:.02em;
-  box-shadow:var(--tier-glow, none);
   transition:background var(--d-base) var(--ease-out), color var(--d-base) var(--ease-out),
-             box-shadow var(--d-base) var(--ease-out), transform var(--d-fast) var(--ease-spring);
+             transform var(--d-fast) var(--ease-spring);
 }
 .harem-item:hover .harem-avatar,
 .harem-item:hover .harem-avatar-fallback{
@@ -877,18 +861,6 @@ button:active{
   overflow:hidden;
   isolation:isolate;
 }
-.card::before{
-  content:"";
-  position:absolute;
-  top:0;left:-70%;
-  width:35%;height:100%;
-  background:linear-gradient(115deg, transparent, rgba(var(--fg-rgb),.04), transparent);
-  transform:skewX(-18deg);
-  transition:left .9s var(--ease-out);
-  pointer-events:none;
-  z-index:-1;
-}
-.card:hover::before{left:140%;}
 
 /* ---- Bulle de tags contextuelle (Wish Formator) : remplace le
    modal plein écran par une petite bulle ancrée sur la carte
@@ -1074,8 +1046,7 @@ button:active{
   box-shadow:none;
 }
 .panel .card:hover{
-  box-shadow:var(--e-3), inset 0 1px 0 rgba(var(--fg-rgb),.07),
-             var(--panel-glow, var(--glow-mono));
+  box-shadow:none;
 }
 
 /* ---- Encarts : même structure, seul le filet gauche change ----
@@ -1152,28 +1123,13 @@ details.card:not([open]) > summary{
 }
 
 /* ============================================================
-   PROFONDEUR — halo au curseur, liseré lumineux, entrée en cascade.
-   Trois effets qui se cumulent sans alourdir : tout est en CSS pur,
-   seul le halo a besoin de deux variables posées par app.js.
-   ============================================================ */
+   PROFONDEUR — entrée en cascade au changement d'onglet.
 
-/* ---- Halo qui suit le curseur ----
-   ::before porte déjà le balayage de reflet, on utilise donc ::after.
-   z-index:-1 le place sous le contenu, dans le contexte isolé de la
-   carte (isolation:isolate), donc jamais au-dessus du texte. */
-.card::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:radial-gradient(
-    460px circle at var(--cx, 50%) var(--cy, 0%),
-    rgba(var(--fg-rgb),.09),
-    transparent 62%);
-  opacity:var(--spot, 0);
-  transition:opacity var(--d-base) var(--ease-out);
-  pointer-events:none;
-  z-index:-1;
-}
+   Le halo qui suivait le curseur sur chaque carte et le reflet qui
+   la balayait au survol ont été retirés : deux effets lumineux qui
+   se déclenchaient simplement en passant la souris sur un bloc,
+   sans rien signaler. Le relief tient désormais aux bordures.
+   ============================================================ */
 
 /* ---- Entrée en cascade au changement d'onglet ----
    Chaque bloc du panneau arrive avec un léger décalage : la page se

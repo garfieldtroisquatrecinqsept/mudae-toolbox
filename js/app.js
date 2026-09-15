@@ -48,35 +48,10 @@
   }
   initLoader();
 
-  /* Halo qui suit le curseur sur la carte survolée. Un seul écouteur
-     délégué sur <main> plutôt qu'un par carte : les cartes sont créées
-     et détruites dynamiquement par plusieurs modules. */
-  function initCardSpotlight(){
-    var main = document.querySelector("main");
-    if(!main) return;
-    if(window.matchMedia){
-      if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-      if(!window.matchMedia("(hover: hover)").matches) return;
-    }
-    var last = null;
-    main.addEventListener("pointermove", function(e){
-      var card = e.target && e.target.closest ? e.target.closest(".card") : null;
-      if(card !== last && last) last.style.removeProperty("--spot");
-      last = card;
-      if(!card) return;
-      var r = card.getBoundingClientRect();
-      card.style.setProperty("--cx", (e.clientX - r.left).toFixed(0) + "px");
-      card.style.setProperty("--cy", (e.clientY - r.top).toFixed(0) + "px");
-      card.style.setProperty("--spot", "1");
-    });
-    main.addEventListener("pointerleave", function(){
-      if(last){ last.style.removeProperty("--spot"); last = null; }
-    });
-  }
 
-  /* RangÃ©e d'onglets au motif ARIA tablist : un seul onglet dans
-     l'ordre de tabulation, les flÃ¨ches circulent entre eux, DÃ©but et
-     Fin sautent aux extrÃ©mitÃ©s. */
+  /* Rangée d'onglets au motif ARIA tablist : un seul onglet dans
+     l'ordre de tabulation, les flèches circulent entre eux, Début et
+     Fin sautent aux extrémités. */
   function initTabs(){
     var tabs = Array.prototype.slice.call(document.querySelectorAll("#tabs .tab-btn"));
     if(!tabs.length) return;
@@ -114,7 +89,7 @@
   document.addEventListener("DOMContentLoaded", function(){
     initTheme();
     initTabs();
-    initCardSpotlight();
+
     CropperTool.init();
     Solvers.init();
     WishFormator.init();
