@@ -34,9 +34,9 @@ body{
 .topbar-row{
   display:flex;
   align-items:center;
-  justify-content:space-between;
+  justify-content:flex-end;
   gap:var(--s-3);
-  margin-bottom:var(--s-4);
+  margin-bottom:var(--s-2);
 }
 .brand{
   font-size:var(--t-xl);
@@ -93,7 +93,7 @@ body{
 
 /* ---- Cartes ---- */
 .card{
-  background:linear-gradient(180deg, var(--surface) 0%, var(--n-900) 100%);
+  background:var(--surface);
   border-color:var(--border-subtle);
   border-radius:var(--r-lg);
   padding:var(--s-5) var(--s-6);
@@ -366,8 +366,8 @@ button:active{
   box-shadow:var(--e-4);
 }
 .wish-item.drop-target{
-  border-color:var(--teal);
-  box-shadow:var(--glow-teal);
+  border-color:var(--accent);
+  box-shadow:none;
   transform:translateX(6px);
 }
 .wish-item .rank{
@@ -381,13 +381,13 @@ button:active{
   color:var(--text-faint);
   transition:color var(--d-fast) var(--ease-out);
 }
-.wish-item:hover .grip{color:var(--purple-ink);}
+.wish-item:hover .grip{color:var(--text);}
 .wish-item .wname{font-size:var(--t-base);font-weight:var(--fw-semi);}
 
 /* ---- Modale ---- */
 .modal-backdrop{
-  background:rgba(8,6,12,.78);
-  backdrop-filter:blur(6px);
+  background:rgba(0,0,0,.5);
+  backdrop-filter:blur(2px);
   animation:fadeIn var(--d-base) var(--ease-out);
 }
 .modal{
@@ -540,7 +540,7 @@ button:active{
 }
 .tag-option:hover{background:var(--surface2);border-color:var(--border);}
 .tag-option.active{
-  border-color:var(--purple);
+  border-color:var(--accent);
   background:rgba(185,140,255,.09);
 }
 
@@ -580,7 +580,7 @@ button:active{
   border-left-width:3px;
   line-height:var(--lh-relaxed);
 }
-.status.ok{border-left-color:var(--teal);}
+.status.ok{border-left-color:var(--accent);}
 .status.warn{border-left-color:var(--orange);}
 .status.error{border-left-color:var(--red);}
 
@@ -596,7 +596,7 @@ button:active{
   transform:translateY(-2px);
   box-shadow:var(--e-2);
 }
-.asset.selected,.poke-card.selected{border-color:rgba(var(--fg-rgb),.55);box-shadow:var(--glow-mono);}
+.asset.selected,.poke-card.selected{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;}
 
 /* ---- Grille des solvers ---- */
 .cell{
@@ -672,11 +672,11 @@ button:active{
 /* Halo par palier de rareté (kakera) : inspiré d'une carte profil à
    glow par tier trouvée via le MCP 21st, adapté en CSS pur au lieu
    du composant React/Tailwind d'origine. */
-.harem-item.k-none{ --tier-glow:0 0 0 1px rgba(var(--fg-rgb),.12); }
-.harem-item.k-low{  --tier-glow:0 0 0 1px rgba(var(--fg-rgb),.24), 0 0 10px rgba(var(--fg-rgb),.14); }
-.harem-item.k-mid{  --tier-glow:0 0 0 1px rgba(var(--fg-rgb),.36), 0 0 14px rgba(var(--fg-rgb),.2); }
-.harem-item.k-high{ --tier-glow:0 0 0 1px rgba(var(--fg-rgb),.48), 0 0 18px rgba(var(--fg-rgb),.26); }
-.harem-item.k-top{  --tier-glow:0 0 0 1px rgba(var(--fg-rgb),.65), 0 0 24px rgba(var(--fg-rgb),.34); }
+.harem-item.k-none{ --tier-glow:none; }
+.harem-item.k-low{  --tier-glow:none; }
+.harem-item.k-mid{  --tier-glow:none; }
+.harem-item.k-high{ --tier-glow:none; }
+.harem-item.k-top{  --tier-glow:none; }
 
 .harem-item:hover{
   transform:translateY(-2px);
@@ -1006,10 +1006,11 @@ button:active{
 
 /* Liseré clair sur l'arête haute : donne du relief sans ombre lourde */
 .card{
-  box-shadow:var(--e-2), inset 0 1px 0 rgba(var(--fg-rgb),.05);
+  box-shadow:none;
+  border-color:var(--border-subtle);
 }
 .card:hover{
-  box-shadow:var(--e-3), inset 0 1px 0 rgba(var(--fg-rgb),.07);
+  box-shadow:none;
 }
 .panel .card:hover{
   box-shadow:var(--e-3), inset 0 1px 0 rgba(var(--fg-rgb),.07),
@@ -1160,44 +1161,28 @@ details.card:not([open]) > summary{
 textarea{min-height:96px;}
 
 /* ============================================================
-   TITRE D'ONGLET — grand, centré, dégradé
-   Le filet d'accent passe de la gauche à un trait court sous le
-   titre, seule position cohérente avec un texte centré.
+   TITRE D'ONGLET — un intitulé de section, aligné à gauche
+   Le titre centré en 3 rem et son dégradé tenaient de la page
+   d'accueil : répétés sur sept panneaux, ils coûtaient une demi
+   hauteur d'écran avant le premier réglage.
    ============================================================ */
 .panel h1{
-  text-align:center;
+  text-align:left;
   padding-left:0;
   font-family:var(--font-display);
-  font-size:clamp(2rem, 4.4vw, 3.1rem);
-  font-weight:var(--fw-bold);
-  letter-spacing:-.035em;
-  line-height:1.05;
-  margin:var(--s-5) 0 var(--s-5);
-  background-image:linear-gradient(180deg,
-    var(--fg) 0%,
-    rgba(var(--fg-rgb),.62) 100%);
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
+  font-size:var(--t-xl);
+  font-weight:var(--fw-semi);
+  letter-spacing:-.02em;
+  line-height:1.2;
+  margin:0 0 var(--s-1);
+  color:var(--text);
 }
-.panel h1::before{
-  left:50%;
-  right:auto;
-  top:auto;
-  bottom:-14px;
-  transform:translateX(-50%);
-  width:64px;
-  height:3px;
-  background:linear-gradient(90deg,
-    transparent,
-    var(--panel-accent, var(--fg)),
-    transparent);
-}
+.panel h1::before{display:none;}
 .panel .subtitle{
-  text-align:center;
-  margin-left:auto;
-  margin-right:auto;
-  max-width:62ch;
+  text-align:left;
+  margin-left:0;
+  margin-right:0;
+  max-width:70ch;
 }
 
 /* ============================================================

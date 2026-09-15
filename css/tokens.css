@@ -1,27 +1,34 @@
 /* ============================================================
    TOKENS — couche 1 : primitives et sémantique
    Chargé avant style.css, surcharge les variables historiques.
+
+   Direction : papier et encre. Neutres purs, angles quasi droits,
+   aucun halo. Les seules couleurs saturées du site sont les teintes
+   de jeu des grilles de solvers, qui doivent rester fidèles.
    ============================================================ */
 
 :root{
 
-  /* ---- Primitives : rampe neutre violette ---- */
-  --n-950:#0e0b14;
-  --n-900:#151120;
-  --n-850:#1b1628;
-  --n-800:#221c31;
-  --n-700:#2e2742;
-  --n-600:#7562a3;   /* bordure : 3.38:1 sur surface, 3.15:1 sur surface2 */
-  --n-500:#6d5f91;
-  --n-400:#9488b5;
-  --n-300:#b3a8ce;
-  --n-200:#d5cee6;
-  --n-100:#efeaf9;
+  /* ---- Primitives : rampe neutre, sans teinte ---- */
+  --n-950:#0f0f11;
+  --n-900:#141417;
+  --n-850:#18181c;
+  --n-800:#1e1e23;
+  --n-700:#2a2a30;
+  --n-600:#6a6a75;   /* bordure de contrôle : 3.3:1 sur --surface */
+  --n-500:#84848f;
+  --n-400:#8a8a95;
+  --n-300:#aeaeb8;
+  --n-200:#d4d4da;
+  --n-100:#f0f0f2;
 
-  /* ---- Primitives : accents ---- */
+  /* ---- Primitives : teintes de jeu ----
+     Ce sont les couleurs réelles des grilles Mudae ($mms, $oc…).
+     Elles ne servent pas d'accent d'interface et ne doivent pas
+     être fondues dans la rampe neutre : le solveur ment sinon. */
   --a-purple:#b98cff;
-  --a-purple-deep:#7450e2;   /* blanc 5.27:1 */
-  --a-purple-mid:#9450e2;    /* blanc 4.66:1 */
+  --a-purple-deep:#7450e2;
+  --a-purple-mid:#9450e2;
   --a-teal:#3fdcc6;
   --a-orange:#ffa563;
   --a-red:#ff6b80;
@@ -37,7 +44,7 @@
   --surface3:var(--n-700);
   --surface-raised:var(--n-800);
 
-  /* ---- Sémantique : bordures (contraste corrigé) ---- */
+  /* ---- Sémantique : bordures ---- */
   --border:var(--n-600);
   --border-subtle:var(--n-700);
   --border-strong:var(--n-500);
@@ -47,7 +54,13 @@
   --text-dim:var(--n-300);
   --text-faint:var(--n-400);
 
-  /* ---- Sémantique : accents ---- */
+  /* ---- Accent d'interface : l'encre elle-même ----
+     Boutons, onglet actif, sélection, focus. Monochrome assumé. */
+  --accent:var(--n-100);
+  --accent-soft:rgba(240,240,242,.1);
+  --on-accent:var(--n-950);
+
+  /* ---- Sémantique : teintes de jeu exposées ---- */
   --purple:var(--a-purple);
   --teal:var(--a-teal);
   --orange:var(--a-orange);
@@ -57,30 +70,32 @@
   --blue:var(--a-blue);
   --pink:var(--a-pink);
 
-  /* ---- Échelle d'espacement : base 4px ---- */
-  --s-1:4px;
-  --s-2:8px;
-  --s-3:12px;
-  --s-4:16px;
-  --s-5:20px;
-  --s-6:24px;
-  --s-8:32px;
-  --s-10:40px;
-  --s-12:48px;
-  --s-16:64px;
+  /* ---- Espacement : resserré d'un cran par rapport à la v1 ---- */
+  --s-1:3px;
+  --s-2:6px;
+  --s-3:10px;
+  --s-4:14px;
+  --s-5:16px;
+  --s-6:20px;
+  --s-8:26px;
+  --s-10:32px;
+  --s-12:38px;
+  --s-16:48px;
 
-  /* ---- Échelle typographique modulaire ---- */
+  /* ---- Échelle typographique ----
+     Le corps de texte ne descend pas sous 12px : la compacité vient
+     de l'espacement et des titres, pas d'un texte illisible. */
   --t-xs:12px;
   --t-sm:13px;
   --t-base:15px;
-  --t-md:16px;
-  --t-lg:18px;
-  --t-xl:22px;
-  --t-2xl:28px;
+  --t-md:15px;
+  --t-lg:16px;
+  --t-xl:19px;
+  --t-2xl:23px;
 
   --lh-tight:1.25;
-  --lh-normal:1.55;
-  --lh-relaxed:1.7;
+  --lh-normal:1.5;
+  --lh-relaxed:1.6;
 
   --fw-normal:400;
   --fw-medium:500;
@@ -89,53 +104,54 @@
 
   --font-sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --font-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
-  --font-display:"Bricolage Grotesque","Inter",-apple-system,sans-serif;
+  --font-display:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 
-  /* ---- Rayons ---- */
-  --r-sm:6px;
-  --r-md:10px;
-  --r-lg:14px;
-  --r-xl:18px;
-  --r-full:999px;
-  --radius:var(--r-lg);
+  /* ---- Rayons : un seul, presque droit ---- */
+  --r-sm:2px;
+  --r-md:3px;
+  --r-lg:3px;
+  --r-xl:4px;
+  --r-full:999px;   /* réservé aux formes réellement circulaires */
+  --radius:3px;
 
-  /* ---- Élévation ---- */
-  --e-1:0 1px 2px rgba(0,0,0,.32);
-  --e-2:0 2px 8px rgba(0,0,0,.36);
-  --e-3:0 8px 24px rgba(0,0,0,.44);
-  --e-4:0 16px 48px rgba(0,0,0,.52);
-  --glow-purple:0 0 0 1px rgba(185,140,255,.34), 0 4px 20px rgba(139,92,246,.22);
-  --glow-teal:0 0 0 1px rgba(63,220,198,.34), 0 4px 20px rgba(63,220,198,.18);
-  --glow-mono:0 0 0 1px rgba(255,255,255,.32), 0 4px 22px rgba(255,255,255,.16);
+  /* ---- Élévation : discrète, jamais colorée ---- */
+  --e-1:0 1px 1px rgba(0,0,0,.2);
+  --e-2:0 1px 2px rgba(0,0,0,.28);
+  --e-3:0 4px 14px -8px rgba(0,0,0,.5);
+  --e-4:0 16px 40px -22px rgba(0,0,0,.6);
+
+  /* ---- Anciens halos : réduits à un liseré ----
+     Les noms restent pour ne pas casser les appels existants, mais
+     plus rien ne diffuse : un simple contour de 1px. */
+  --glow-purple:0 0 0 1px rgba(var(--fg-rgb),.3);
+  --glow-teal:0 0 0 1px rgba(var(--fg-rgb),.3);
+  --glow-mono:0 0 0 1px rgba(var(--fg-rgb),.3);
 
   /* ---- Mouvement ---- */
   --d-instant:80ms;
-  --d-fast:140ms;
-  --d-base:220ms;
-  --d-slow:360ms;
+  --d-fast:120ms;
+  --d-base:180ms;
+  --d-slow:280ms;
   --ease-out:cubic-bezier(.22,1,.36,1);
   --ease-in-out:cubic-bezier(.65,0,.35,1);
-  --ease-spring:cubic-bezier(.34,1.56,.64,1);
+  --ease-spring:cubic-bezier(.34,1.4,.64,1);
 
   /* ---- Cible tactile ---- */
-  --touch-min:44px;
+  --touch-min:40px;
 
   /* ---- Focus ---- */
   --focus-ring:0 0 0 2px var(--bg), 0 0 0 4px var(--fg);
 
   /* ---- Thème : triplet RGB utilisé partout où le site pose du
-     blanc pur en dur (boutons ghost, reflets, halos). Un seul
-     changement ici les fait tous basculer en mode jour. ---- */
-  --fg:#fff;
-  --fg-rgb:255,255,255;
-  --bg-rgb:14,11,20;
-  --blob-blend:screen;
+     blanc pur en dur. Un seul changement ici bascule le tout. ---- */
+  --fg:#f0f0f2;
+  --fg-rgb:240,240,242;
+  --bg-rgb:15,15,17;
+  --blob-blend:normal;
 
-  /* ---- Accents "encre" : mêmes teintes que --purple/--orange/etc.
-     en sombre (les pastels sont déjà lisibles sur fond quasi-noir).
-     À ne PAS utiliser pour les couleurs de grille des solvers, qui
-     doivent rester les vraies couleurs du jeu quel que soit le thème
-     — uniquement pour du texte/bordures d'accent lisibles. ---- */
+  /* ---- Accents "encre" : versions lisibles en texte des teintes
+     de jeu. En sombre les pastels passent déjà sur fond quasi-noir.
+     À ne PAS utiliser pour les grilles de solvers. ---- */
   --purple-ink:var(--purple);
   --teal-ink:var(--teal);
   --orange-ink:var(--orange);
@@ -147,47 +163,57 @@
 }
 
 :root[data-theme="light"]{
-  /* Les composants qui référencent directement les primitives
-     --n-900/--n-950 (dégradés de carte, avatars, bloc de commandes)
-     ont aussi besoin d'un équivalent clair, sinon leur dégradé va du
-     clair au sombre au lieu de rester dans la même famille. */
-  --n-900:#eae5f0;
-  --n-950:#e1dbeb;
+  /* Les composants qui référencent directement --n-900/--n-950
+     (dégradés de carte, bloc de commandes) ont besoin d'un
+     équivalent clair, sinon leur dégradé part vers le sombre. */
+  --n-900:#ededf0;
+  --n-950:#e4e4e9;
 
-  --bg:#f4f2f7;
+  --bg:#f4f4f6;
   --surface:#ffffff;
-  --surface2:#f1eef6;
-  --surface3:#e6e1ee;
+  --surface2:#f0f0f3;
+  --surface3:#e6e6ea;
   --surface-raised:#ffffff;
 
-  --border:#c9c1d9;
-  --border-subtle:#e2dcec;
-  --border-strong:#a99cc4;
+  --border:#8e8e97;        /* 3.2:1 sur blanc */
+  --border-subtle:#dcdce1;
+  --border-strong:#6e6e78;
 
-  --text:#181420;
-  --text-dim:#4d465c;
-  --text-faint:#665f79;
+  --text:#14141a;
+  --text-dim:#5a5a63;      /* 6.2:1 sur --bg */
+  --text-faint:#6e6e78;    /* 4.7:1 sur --bg */
 
-  --fg:#0b0812;
-  --fg-rgb:11,8,18;
-  --bg-rgb:244,242,247;
+  --accent:#14141a;
+  --accent-soft:rgba(20,20,26,.07);
+  --on-accent:#ffffff;
 
-  --glow-mono:0 0 0 1px rgba(11,8,18,.16), 0 4px 22px rgba(11,8,18,.08);
-  --blob-blend:multiply;
+  --fg:#14141a;
+  --fg-rgb:20,20,26;
+  --bg-rgb:244,244,246;
 
-  /* Pastels foncés : les teintes d'origine (--purple, --orange...)
-     n'offrent pas assez de contraste en texte sur fond clair. */
-  --purple-ink:#7c3aed;
+  --e-1:0 1px 1px rgba(20,20,26,.05);
+  --e-2:0 1px 2px rgba(20,20,26,.08);
+  --e-3:0 4px 14px -8px rgba(20,20,26,.2);
+  --e-4:0 16px 40px -22px rgba(20,20,26,.3);
+
+  --glow-purple:0 0 0 1px rgba(20,20,26,.28);
+  --glow-teal:0 0 0 1px rgba(20,20,26,.28);
+  --glow-mono:0 0 0 1px rgba(20,20,26,.28);
+  --blob-blend:normal;
+
+  /* Les pastels d'origine n'ont pas assez de contraste en texte sur
+     fond clair : versions foncées, réservées au texte et aux bordures. */
+  --purple-ink:#6d28d9;
   --teal-ink:#0a6b62;
-  --orange-ink:#a8500d;
-  --red-ink:#c31d3a;
-  --green-ink:#157a3c;
-  --yellow-ink:#8a6a10;
-  --blue-ink:#2251c9;
-  --pink-ink:#be1b71;
+  --orange-ink:#9a4a0c;
+  --red-ink:#b81833;
+  --green-ink:#146b36;
+  --yellow-ink:#7d5f0e;
+  --blue-ink:#1f49b8;
+  --pink-ink:#ad1867;
 }
 
-/* Coupe-circuit pendant le bascule de thème : voir initTheme() dans
+/* Coupe-circuit pendant la bascule de thème : voir initTheme() dans
    js/app.js. Évite qu'une propriété transitionnée reste figée sur son
    ancienne valeur quand elle dépend d'une variable CSS re-résolue par
    [data-theme] plutôt que changée directement par la règle. */
@@ -199,7 +225,6 @@ html.theme-switching *::after{
   animation-play-state:paused !important;
 }
 
-/* Respect de prefers-reduced-motion : priorité 7 du skill */
 @media (prefers-reduced-motion: reduce){
   :root{
     --d-instant:0ms;
